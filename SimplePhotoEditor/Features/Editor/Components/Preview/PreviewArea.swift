@@ -1,8 +1,3 @@
-//
-//  PreviewArea.swift
-//  SimplePhotoEditor
-//
-
 import SwiftUI
 import PencilKit
 
@@ -14,14 +9,13 @@ struct PreviewArea: View {
     @Binding var tool:      PKInkingTool
     @Binding var isErasing: Bool
 
-    // масштаб / пинч-жест
+    @Binding var showSourceDialog: Bool
+
     @State private var scale: CGFloat = 1
     @GestureState private var pinch: CGFloat = 1
 
-    private let heightRatio: CGFloat = 0.6          // когда фото ещё нет
+    private let heightRatio: CGFloat = 0.6
 
-    // MARK: – helper
-    /// Переводит глобальную высоту клавиатуры в координаты холста
     private func localKeyboardHeight(_ hGlobal: CGFloat,
                                      geo: GeometryProxy) -> CGFloat {
         max(0, hGlobal - geo.safeAreaInsets.bottom)
@@ -29,7 +23,6 @@ struct PreviewArea: View {
 
     var body: some View {
         GeometryReader { geo in
-            // ───── размеры холста ─────
             let w = geo.size.width
             let h: CGFloat = {
                 if let ui = vm.previewImage {
@@ -40,10 +33,10 @@ struct PreviewArea: View {
                 }
             }()
 
-            // ───── канва ─────
-            ZStack {
+            let base = ZStack {
                 PhotoLayer(image: vm.previewImage,
-                           maxSize: CGSize(width: w, height: h))
+                           maxSize: CGSize(width: w, height: h),
+                           onAddImage: { vm.originalImage == nil ? (showSourceDialog = true) : () })
                     .rotationEffect(.degrees(Double(vm.rotationCount) * 90))
                     .scaleEffect(x: vm.isFlippedHorizontally ? -1 : 1, y: 1)
                     .animation(.easeInOut(duration: 0.3), value: vm.rotationCount)
@@ -61,8 +54,7 @@ struct PreviewArea: View {
                         .frame(width: w, height: h)
                 }
 
-                // затемнение + подсказка
-                if vm.markup == .text && textVM.isPlacing {
+                if vm.markup == .text && textVM.isPlacing && textVM.items.isEmpty {
                     Color.black.opacity(0.4).frame(width: w, height: h)
                     Text("Нажмите, чтобы добавить текст")
                         .font(.headline)
@@ -74,46 +66,48 @@ struct PreviewArea: View {
                 }
             }
             .frame(width: w, height: h)
-            .coordinateSpace(name: "canvas")
             .contentShape(Rectangle())
-
-            // ───── пинч-масштаб ─────
-            .simultaneousGesture(
-                MagnificationGesture()
-                    .updating($pinch) { v, s, _ in s = v }
-                    .onEnded { v in scale *= v }
-            )
-
-            // ───── тап → новый текст ─────
-            .gesture(
-                TapGesture()
-                    .onEnded {
-                        guard vm.markup == .text, textVM.isPlacing else { return }
-
-                        let overlap = localKeyboardHeight(vm.keyboardHeight, geo: geo)
-
-                        textVM.placeCentered(
-                            in: CGSize(width: w, height: h),
-                            keyboardH: overlap
-                        )
-                    }
-            )
-
             .scaleEffect(scale * pinch)
             .clipped()
             .frame(maxHeight: .infinity, alignment: .center)
+            .onAppear { 
+                print("🎯 PreviewArea: onAppear - setting canvas size: \(CGSize(width: w, height: h))")
+                vm.canvasSize = CGSize(width: w, height: h) 
+            }
+            .onChange(of: vm.keyboardHeight) { old, new in
+                print("🎯 PreviewArea: keyboardHeight changed to: \(new)")
+                let overlap = localKeyboardHeight(new, geo: geo)
+                print("🎯 PreviewArea: calling keyboardDidChange with overlap: \(overlap)")
+                textVM.keyboardDidChange(overlap, canvas: CGSize(width: w, height: h), imageSize: vm.previewImage.map { $0.size })
+            }
 
-            // актуальный размер холста в VM
-            .onAppear { vm.canvasSize = CGSize(width: w, height: h) }
-
-            // клавиатура изменилась → двигаем активный слой
-            .onChange(of: vm.keyboardHeight) { newH in
-                let overlap = localKeyboardHeight(newH, geo: geo)
-
-                textVM.adjustActivePosition(
-                    canvas: CGSize(width: w, height: h),
-                    keyboardH: overlap
-                )
+            if vm.markup == .text && textVM.isPlacing {
+                base
+                    .gesture(
+                        TapGesture()
+                            .onEnded {
+                                print("🎯 PreviewArea: Tap gesture detected (refactored)")
+                                let overlap = localKeyboardHeight(vm.keyboardHeight, geo: geo)
+                                print("🎯 PreviewArea: Calling placeCentered with canvas: \(CGSize(width: w, height: h)), keyboardH: \(overlap)")
+                                textVM.placeCentered(
+                                    in: CGSize(width: w, height: h),
+                                    keyboardH: overlap,
+                                    imageSize: vm.previewImage.map { $0.size }
+                                )
+                            }
+                    )
+                    .simultaneousGesture(
+                        MagnificationGesture()
+                            .updating($pinch) { v, s, _ in s = v }
+                            .onEnded { v in scale *= v }
+                    )
+            } else {
+                base
+                    .simultaneousGesture(
+                        MagnificationGesture()
+                            .updating($pinch) { v, s, _ in s = v }
+                            .onEnded { v in scale *= v }
+                    )
             }
         }
     }

@@ -10,12 +10,16 @@ struct LeadingControls: View {
                 rotationCount += 1
             } label: {
                 Image(systemName: "rotate.right")
+                    .font(.title2)
+                    .frame(width: 32, height: 32)
             }
 
             Button {
                 isFlippedHorizontally.toggle()
             } label: {
                 Image(systemName: "arrow.left.and.right.righttriangle.left.righttriangle.right")
+                    .font(.title2)
+                    .frame(width: 32, height: 32)
             }
         }
     }
@@ -32,6 +36,7 @@ struct TrailingControls: View {
             Button(action: onDrawTap) {
                 Image(systemName: MarkupTool.draw.iconName)
                     .font(.title2)
+                    .frame(width: 32, height: 32)
                     .foregroundColor(markup == .draw ? .accentColor : .secondary)
             }
 
@@ -39,6 +44,7 @@ struct TrailingControls: View {
             Button(action: onTextTap) {
                 Image(systemName: MarkupTool.text.iconName)
                     .font(.title2)
+                    .frame(width: 32, height: 32)
                     .foregroundColor(markup == .text ? .accentColor : .secondary)
             }
         }

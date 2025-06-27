@@ -5,17 +5,16 @@ import Combine
 
 @MainActor
 final class EditorViewModel: ObservableObject {
-    @Published var mode: EditorMode = .filter
     @Published var markup: MarkupTool = .none
 
     @Published var keyboardHeight: CGFloat = 0
-
     @Published var inputData: Data?
-    @Published var selectedFilter: Filter?
-    @Published private(set) var previewImage: UIImage?
+    @Published var selectedFilter: Filter? = nil
+    @Published private(set) var previewImage: UIImage? = nil
     @Published var canvasSize: CGSize = .zero
     @Published var rotationCount = 0
     @Published var isFlippedHorizontally = false
+    @Published private(set) var originalImage: UIImage? = nil
 
     let textVM = TextOverlayViewModel()
 
@@ -36,6 +35,7 @@ final class EditorViewModel: ObservableObject {
         exportService:    ExportService,
         previewService:   PreviewRenderService = PreviewRenderServiceImpl()
     ) {
+        print("🎨 EditorViewModel: init")
         self.transformService = transformService
         self.filterService    = filterService
         self.composeService   = composeService
@@ -50,6 +50,20 @@ final class EditorViewModel: ObservableObject {
               self?.updatePreview(raw: raw, filter: fx)
           }
           .store(in: &cancellables)
+
+        $inputData
+            .sink { [weak self] data in
+                guard let data else { self?.originalImage = nil; return }
+                self?.originalImage = UIImage(data: data)
+            }
+            .store(in: &cancellables)
+
+        Publishers.CombineLatest($originalImage, $selectedFilter)
+            .sink { [weak self] image, filter in
+                guard let self = self else { return }
+                self.previewImage = self.apply(filter: filter, to: image)
+            }
+            .store(in: &cancellables)
     }
 
     private func updatePreview(raw: Data?, filter: Filter?) {
@@ -68,23 +82,27 @@ final class EditorViewModel: ObservableObject {
     }
 
     func startDraw() {
+        print("🎨 EditorViewModel: startDraw() - switching to draw mode")
         markup = .draw
         textVM.finishEditing()
     }
 
     func startText() {
+        print("🔤 EditorViewModel: startText() - switching to text mode")
         markup = .text
-        // включаем режим “разместить текст следующий тап”
+        // включаем режим "разместить текст следующий тап"
         textVM.enterPlacement()
     }
 
     func finishMarkup() {
+        print("🎨 EditorViewModel: finishMarkup() - switching to none mode")
         markup = .none
         textVM.finishEditing()
     }
 
     /// Вызывается каждый раз, когда клавиатура меняет высоту
     func updateKeyboard(h: CGFloat) {
+        print("⌨️ EditorViewModel: updateKeyboard(h: \(h))")
         keyboardHeight = h
     }
 
@@ -117,5 +135,19 @@ final class EditorViewModel: ObservableObject {
             img = try composeService.merge(base: img, overlayPNG: overlay)
         }
         return img
+    }
+
+    private func apply(filter: Filter?, to image: UIImage?) -> UIImage? {
+        guard let image = image else { return nil }
+        guard let filter = filter, !filter.filterName.isEmpty else { return image }
+        guard let ciImage = CIImage(image: image), let fx = CIFilter(name: filter.filterName) else { return image }
+        fx.setValue(ciImage, forKey: kCIInputImageKey)
+        let context = CIContext()
+        if let outputCIImage = fx.outputImage,
+           let cgImage = context.createCGImage(outputCIImage, from: outputCIImage.extent) {
+            return UIImage(cgImage: cgImage, scale: image.scale, orientation: image.imageOrientation)
+        } else {
+            return image
+        }
     }
 }

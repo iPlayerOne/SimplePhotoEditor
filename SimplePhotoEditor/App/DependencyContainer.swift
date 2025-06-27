@@ -55,7 +55,7 @@ final class AppDependencyContainer {
             composeService:   composeService,
             textService:      textService,
             exportService:    exportService
-            // previewRenderer по умолчанию — PreviewRenderServiceImpl()
+
         )
     }
 }

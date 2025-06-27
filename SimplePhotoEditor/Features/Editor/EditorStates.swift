@@ -1,13 +1,5 @@
 import Foundation
 
-enum EditorMode: String, CaseIterable, Identifiable {
-    case filter
-
-    var id: Self { self }
-    var iconName: String { "camera.filters" }
-    var title:    String { "Фильтры" }
-}
-
 enum MarkupTool: CaseIterable, Identifiable {
     case none
     case draw
@@ -25,5 +17,4 @@ enum MarkupTool: CaseIterable, Identifiable {
             return "textformat"
         }
     }
-
 }

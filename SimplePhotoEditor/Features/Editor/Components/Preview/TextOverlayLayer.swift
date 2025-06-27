@@ -13,5 +13,14 @@ struct TextOverlayLayer: View {
                 )
             }
         }
+        .onAppear {
+            print("📄 TextOverlayLayer: appeared with \(textVM.items.count) items, enabled: \(enabled)")
+        }
+        .onChange(of: textVM.items.count) { old, count in
+            print("📄 TextOverlayLayer: items count changed to \(count)")
+        }
+        .onChange(of: enabled) { old, enabled in
+            print("📄 TextOverlayLayer: enabled changed to \(enabled)")
+        }
     }
 }

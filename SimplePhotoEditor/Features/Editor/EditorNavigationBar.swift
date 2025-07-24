@@ -5,8 +5,6 @@ struct EditorNavigationBar: ToolbarContent {
     
     let isShareEnabled: Bool
     let onShare: () -> Void
-    let isSaveEnabled: Bool
-    let onSave: () -> Void
     let onLogout: () -> Void
 
     var body: some ToolbarContent {
@@ -20,12 +18,6 @@ struct EditorNavigationBar: ToolbarContent {
                 Image(systemName: "square.and.arrow.up")
             }
             .disabled(!isShareEnabled)
-        }
-        ToolbarItem(placement: .navigationBarTrailing) {
-            Button(action: onSave) {
-                Image(systemName: "tray.and.arrow.down")
-            }
-            .disabled(!isSaveEnabled)
         }
         ToolbarItem(placement: .navigationBarTrailing) {
             Button(role: .destructive, action: onLogout) {

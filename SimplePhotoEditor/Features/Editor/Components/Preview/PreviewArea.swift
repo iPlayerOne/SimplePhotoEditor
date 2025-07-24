@@ -74,11 +74,9 @@ struct PreviewArea: View {
                 print("🎯 PreviewArea: onAppear - setting canvas size: \(CGSize(width: w, height: h))")
                 vm.canvasSize = CGSize(width: w, height: h) 
             }
-            .onChange(of: vm.keyboardHeight) { old, new in
-                print("🎯 PreviewArea: keyboardHeight changed to: \(new)")
-                let overlap = localKeyboardHeight(new, geo: geo)
-                print("🎯 PreviewArea: calling keyboardDidChange with overlap: \(overlap)")
-                textVM.keyboardDidChange(overlap, canvas: CGSize(width: w, height: h), imageSize: vm.previewImage.map { $0.size })
+            .onChange(of: vm.keyboardHeight) { newH in
+                let overlap = max(0, newH - geo.safeAreaInsets.bottom)
+                textVM.keyboardDidChange(overlap, canvas: CGSize(width: w, height: h), imageSize: vm.previewImage?.size)
             }
 
             if vm.markup == .text && textVM.isPlacing {
@@ -89,7 +87,7 @@ struct PreviewArea: View {
                                 print("🎯 PreviewArea: Tap gesture detected (refactored)")
                                 let overlap = localKeyboardHeight(vm.keyboardHeight, geo: geo)
                                 print("🎯 PreviewArea: Calling placeCentered with canvas: \(CGSize(width: w, height: h)), keyboardH: \(overlap)")
-                                textVM.placeCentered(
+                                textVM.placeText(
                                     in: CGSize(width: w, height: h),
                                     keyboardH: overlap,
                                     imageSize: vm.previewImage.map { $0.size }

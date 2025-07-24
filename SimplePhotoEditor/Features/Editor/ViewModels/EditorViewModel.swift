@@ -15,6 +15,7 @@ final class EditorViewModel: ObservableObject {
     @Published var rotationCount = 0
     @Published var isFlippedHorizontally = false
     @Published private(set) var originalImage: UIImage? = nil
+    @Published var shareItem: ShareItem?
 
     let textVM = TextOverlayViewModel()
 
@@ -35,7 +36,6 @@ final class EditorViewModel: ObservableObject {
         exportService:    ExportService,
         previewService:   PreviewRenderService = PreviewRenderServiceImpl()
     ) {
-        print("🎨 EditorViewModel: init")
         self.transformService = transformService
         self.filterService    = filterService
         self.composeService   = composeService
@@ -82,41 +82,56 @@ final class EditorViewModel: ObservableObject {
     }
 
     func startDraw() {
-        print("🎨 EditorViewModel: startDraw() - switching to draw mode")
         markup = .draw
         textVM.finishEditing()
     }
 
     func startText() {
-        print("🔤 EditorViewModel: startText() - switching to text mode")
         markup = .text
-        // включаем режим "разместить текст следующий тап"
         textVM.enterPlacement()
     }
 
     func finishMarkup() {
-        print("🎨 EditorViewModel: finishMarkup() - switching to none mode")
         markup = .none
         textVM.finishEditing()
     }
 
-    /// Вызывается каждый раз, когда клавиатура меняет высоту
     func updateKeyboard(h: CGFloat) {
-        print("⌨️ EditorViewModel: updateKeyboard(h: \(h))")
         keyboardHeight = h
     }
 
-    // MARK: — Экспорт и пр. (без изменений)
     func exportFinalImage(drawingOverlay: Data? = nil) async throws {
         let data = try await renderFinalImage(drawingOverlay: drawingOverlay)
         try await exportService.saveToPhotos(data)
     }
-    func makeShareURL(drawingOverlay: Data? = nil) async throws -> URL {
-        let data = try await renderFinalImage(drawingOverlay: drawingOverlay)
-        return try exportService.makeShareURL(from: data)
+    
+    func share(drawingOverlay: Data?) {
+        Task { @MainActor in
+            print("🛠 share started")
+            do {
+                let item = try await makeShareItem(drawingOverlay: drawingOverlay)
+                shareItem = item
+                print("✅ shareItem set:", shareItem?.url.absoluteString ?? "nil")
+            } catch {
+                print("❌ share error:", error.localizedDescription)
+            }
+        }
     }
+    
+    func clearShareItem() {
+        if let item = shareItem {
+            try? FileManager.default.removeItem(at: item.url)
+            shareItem = nil
+        }
+    }
+    
+
     private func renderFinalImage(drawingOverlay: Data?) async throws -> Data {
-        guard let raw = inputData else { throw TransformError.invalidData }
+        print("🔬 renderFinalImage called")
+        guard let raw = inputData else { 
+            print("❌ Нет inputData!")
+            throw TransformError.invalidData 
+        }
         var img = raw
 
         if rotationCount != 0 {
@@ -131,9 +146,19 @@ final class EditorViewModel: ObservableObject {
             to: img,
             downscaleFactor: 1.0
         )
-        if let overlay = drawingOverlay {
-            img = try composeService.merge(base: img, overlayPNG: overlay)
+
+        if let overlay = drawingOverlay, !overlay.isEmpty {
+            print("🖌 overlay bytes:", overlay.count)
+            do {
+                img = try composeService.merge(base: img, overlayPNG: overlay)
+            } catch {
+                print("❌ composeService.merge error:", error)
+                throw error
+            }
+        } else {
+            print("ℹ️ overlay is nil or empty, skip merge")
         }
+        print("🔬 renderFinalImage done, data size:", img.count)
         return img
     }
 
@@ -149,5 +174,13 @@ final class EditorViewModel: ObservableObject {
         } else {
             return image
         }
+    }
+
+    private func makeShareItem(drawingOverlay: Data?) async throws -> ShareItem {
+        print("🔧 makeShareItem called")
+        let data = try await renderFinalImage(drawingOverlay: drawingOverlay)
+        let url = try exportService.makeShareURL(from: data)
+        print("🔧 makeShareItem url:", url.absoluteString)
+        return ShareItem(url: url)
     }
 }

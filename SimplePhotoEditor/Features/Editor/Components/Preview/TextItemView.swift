@@ -4,57 +4,66 @@ struct TextItemView: View {
     @Binding var item: TextItem
     let vm: TextOverlayViewModel
     
-    @FocusState private var focusedID: UUID?
+    @FocusState private var isFocused: Bool
     @GestureState private var dragOffset: CGSize = .zero
+    
+    private var drag: some Gesture {
+        DragGesture()
+            .updating($dragOffset) { value, state, _ in
+                guard !item.isEditing else { return }
+                state = value.translation
+            }
+            .onEnded { value in
+                guard !item.isEditing else { return }
+                item.position.x += value.translation.width
+                item.position.y += value.translation.height
+            }
+    }
+    
+    private var tap: some Gesture {
+        TapGesture()
+            .onEnded {
+                if item.id == vm.activeID {
+                    vm.setActive(id: item.id, editing: true)
+                } else {
+                    vm.setActive(id: item.id)
+                }
+            }
+    }
     
     var body: some View {
         TextField("", text: $item.text)
             .id(item.id)
-            .focused($focusedID, equals: item.id)
+            .focused($isFocused)
+        
             .padding(6)
             .background(item.isEditing ? Color.black.opacity(0.3) : Color.clear)
             .font(.system(size: item.fontSize))
             .foregroundColor(item.color)
             .multilineTextAlignment(.center)
             .fixedSize()
+            .submitLabel(.done)
             .position(x: item.position.x + dragOffset.width,
                       y: item.position.y + dragOffset.height)
-            .gesture(
-                DragGesture()
-                    .updating($dragOffset) { value, state, _ in
-                        if !item.isEditing {
-                            state = value.translation
-                        }
-                    }
-                    .onEnded { value in
-                        if !item.isEditing {
-                            item.position.x += value.translation.width
-                            item.position.y += value.translation.height
-                        }
-                    }
-            )
+            .animation(.spring(response: 0.35,
+                                           dampingFraction: 0.85),
+                                   value: item.position)
+            .gesture(drag)
+            .gesture(tap)
             .onAppear {
-                print("📝 TextItemView: appeared for item \(item.id.uuidString) at position \(item.position)")
-                print("📝 TextItemView: canvas size: \(UIScreen.main.bounds.size)")
                 if item.isEditing {
-                    print("📝 TextItemView: onAppear — устанавливаю фокус для item \(item.id.uuidString)")
-                    DispatchQueue.main.async {
-                        focusedID = item.id
-                    }
+                    isFocused = true
                 }
             }
-            .onChange(of: item.isEditing) { old, editing in
-                print("📝 TextItemView: isEditing changed to \(editing) for item \(item.id.uuidString)")
-                if editing {
-                    DispatchQueue.main.async {
-                        focusedID = item.id
-                    }
-                } else {
-                    focusedID = nil
+            .onSubmit { vm.finishEditing() }
+            .onChange(of: isFocused) { focused in
+                if focused {
+                    vm.setActive(id: item.id, editing: true)
+                } else if item.isEditing {
+                    vm.finishEditing()
                 }
             }
-            .onChange(of: focusedID) { old, new in
-                print("📝 TextItemView: focusedID changed to \(new?.uuidString ?? "nil") for item \(item.id.uuidString)")
-            }
+        
+        
     }
 }

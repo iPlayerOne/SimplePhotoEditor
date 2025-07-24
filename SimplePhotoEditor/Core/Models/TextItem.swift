@@ -8,6 +8,7 @@ struct TextItem: Identifiable {
     var fontSize:  CGFloat
     var color:     Color
     var position:  CGPoint
+    var parkedPosition: CGPoint?
 
     var isEditing  = false
 }

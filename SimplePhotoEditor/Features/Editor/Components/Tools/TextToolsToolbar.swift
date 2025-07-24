@@ -2,7 +2,7 @@ import SwiftUI
 
 struct TextToolsToolbar: ToolbarContent {
     @ObservedObject var vm: TextOverlayViewModel
-    let onDone: () -> Void          // позволяет кастомно закрывать
+    let onDone: () -> Void
 
     var body: some ToolbarContent {
         ToolbarItemGroup(placement: .keyboard) {

@@ -52,11 +52,15 @@ struct EditorView: View {
                     showLibrary: $showLibraryPicker,
                     libraryItem: $libraryItem
                 ) { data in
+                    if let img = UIImage(data: data) {
+                        print("📐 Got image orientation rawValue:", img.imageOrientation.rawValue)
+                        print("📐 Got image orientation description:", img.imageOrientation)
+                     }
                     vm.inputData = data
                 }
             }
             .sheet(item: $vm.shareItem, onDismiss: vm.clearShareItem) { item in
-                ShareSheet(items: [item.url])
+                ShareSheet(items: [item.image])
             }
             .onReceive(keyboard.$height) { newH in
                 vm.updateKeyboard(h: newH)
@@ -123,13 +127,14 @@ extension EditorView {
             showSourceDialog: $showSourceDialog,
             isShareEnabled: vm.previewImage != nil,
             onShare: {
-                print("➡️ share tapped")
-                let uiImage = drawing.image(from: drawing.bounds, scale: UIScreen.main.scale)
-                if let overlay = uiImage.pngData() {
-                    vm.share(drawingOverlay: overlay)
-                } else {
-                    vm.share(drawingOverlay: nil)
-                }
+//                print("➡️ share tapped")
+//                let uiImage = drawing.image(from: drawing.bounds, scale: UIScreen.main.scale)
+//                if let overlay = uiImage.pngData() {
+//                    vm.share(drawingOverlay: overlay)
+//                } else {
+//                    vm.share(drawingOverlay: nil)
+//                }
+                vm.share(drawingOverlay: drawing)
             },
             onLogout: onLogout
         )

@@ -1,36 +1,33 @@
-import Foundation
 import PencilKit
 import UIKit
 
+enum DrawingServiceError: Error {
+    case invalidDrawing
+    case invalidBaseImage
+    case renderFailed
+}
+
 protocol DrawingService {
-  func draw(drawing: Any, on imageData: Data) throws -> Data
+  func draw(drawing: PKDrawing, on baseData: Data) throws -> Data
 }
 
 final class DrawingServiceImpl: DrawingService {
-  public init() {}
-
-  public func draw(drawing: Any, on imageData: Data) throws -> Data {
-    guard let pk = drawing as? PKDrawing else {
-      throw NSError(domain: "DrawingService", code: 0)
+    func draw(drawing: PKDrawing, on baseData: Data) throws -> Data {
+        guard let base = UIImage(data: baseData) else {
+            throw DrawingServiceError.invalidBaseImage
+        }
+        
+        let size  = CGSize(width: base.size.width  * base.scale,
+                           height: base.size.height * base.scale)
+        let rect  = CGRect(origin: .zero, size: size)
+        
+        let overlay = drawing.image(from: rect, scale: base.scale)
+        
+        let renderer = UIGraphicsImageRenderer(size: size)
+        let combined = renderer.jpegData(withCompressionQuality: 0.95) { ctx in
+            base.draw(in: rect)
+            overlay.draw(in: rect)
+        }
+        return combined
     }
-    guard let base = UIImage(data: imageData) else {
-      throw NSError(domain: "DrawingService", code: 1)
-    }
-
-    let size = base.size
-    let rect = CGRect(origin: .zero, size: size)
-    let overlay = pk.image(from: rect, scale: base.scale)
-
-    UIGraphicsBeginImageContextWithOptions(size, false, base.scale)
-    base.draw(at: .zero)
-    overlay.draw(in: rect)
-    guard let combined = UIGraphicsGetImageFromCurrentImageContext(),
-          let out      = combined.jpegData(compressionQuality: 1.0)
-    else {
-      UIGraphicsEndImageContext()
-      throw NSError(domain: "DrawingService", code: 2)
-    }
-    UIGraphicsEndImageContext()
-    return out
-  }
 }

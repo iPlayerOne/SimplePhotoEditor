@@ -24,8 +24,10 @@ struct PreviewArea: View {
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
+            let baseImage = vm.previewImage ?? vm.originalImage
+
             let h: CGFloat = {
-                if let ui = vm.previewImage {
+                if let ui = baseImage {
                     let aspect = ui.size.width / ui.size.height
                     return w / aspect
                 } else {
@@ -34,7 +36,7 @@ struct PreviewArea: View {
             }()
 
             let base = ZStack {
-                PhotoLayer(image: vm.previewImage,
+                PhotoLayer(image: baseImage,
                            maxSize: CGSize(width: w, height: h),
                            onAddImage: { vm.originalImage == nil ? (showSourceDialog = true) : () })
                     .rotationEffect(.degrees(Double(vm.rotationCount) * 90))
@@ -69,14 +71,25 @@ struct PreviewArea: View {
             .contentShape(Rectangle())
             .scaleEffect(scale * pinch)
             .clipped()
+            .onChange(of: baseImage == nil) { isNil in
+                if isNil {
+                    print("🧩 PreviewArea: no image (preview/original) — showing add button")
+                }
+            }
             .frame(maxHeight: .infinity, alignment: .center)
-            .onAppear { 
+            .onAppear {
                 print("🎯 PreviewArea: onAppear - setting canvas size: \(CGSize(width: w, height: h))")
-                vm.canvasSize = CGSize(width: w, height: h) 
+                vm.canvasSize = CGSize(width: w, height: h)
+            }
+            .onChange(of: vm.previewImage) { _ in
+                vm.canvasSize = CGSize(width: w, height: h)
+            }
+            .onChange(of: vm.originalImage) { _ in
+                vm.canvasSize = CGSize(width: w, height: h)
             }
             .onChange(of: vm.keyboardHeight) { newH in
                 let overlap = max(0, newH - geo.safeAreaInsets.bottom)
-                textVM.keyboardDidChange(overlap, canvas: CGSize(width: w, height: h), imageSize: vm.previewImage?.size)
+                textVM.keyboardDidChange(overlap, canvas: CGSize(width: w, height: h), imageSize: baseImage?.size)
             }
 
             if vm.markup == .text && textVM.isPlacing {

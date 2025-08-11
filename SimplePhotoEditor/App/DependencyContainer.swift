@@ -3,40 +3,37 @@ import Foundation
 @MainActor
 final class AppDependencyContainer {
 
-    // --- синглтоны сервисов ------------------------------------------
-    private let authService:      AuthService
-    private let exportService:    ExportService
-    private let transformService: TransformService
-    private let filterService:    FilterService
-    private let composeService:   ImageComposeService
-    private let textService:      TextOverlayService
+    private let transformService = TransformServiceImpl()
+    private let filterService    = FilterServiceImpl()
+    private let overlayService   = OverlayRenderServiceImpl()
+    private let decodeService    = ImageDecodeServiceImpl()
+    private let previewService   = PreviewRenderServiceImpl()
+    private let exportService    = ExportServiceImpl()
 
-    // --- инъекция конкретных реализаций ------------------------------
-    init(
-        authService:      AuthService       = FirebaseAuthService(),
-        exportService:    ExportService     = ExportServiceImpl(),
-        transformService: TransformService  = TransformServiceImpl(),
-        filterService:    FilterService     = FilterServiceImpl(),
-        composeService:   ImageComposeService = ImageComposeServiceImpl(),
-        textService:      TextOverlayService = TextOverlayServiceImpl()
-    ) {
-        self.authService      = authService
-        self.exportService    = exportService
-        self.transformService = transformService
-        self.filterService    = filterService
-        self.composeService   = composeService
-        self.textService      = textService
+    private lazy var imagePipeline: ImagePipeline = {
+        ImagePipelineImpl(
+            decode:   decodeService,
+            transform: transformService,
+            filter:    filterService,
+            overlay:   overlayService
+        )
+    }()
+
+    let authService: AuthService
+    let googleCoordinator: GoogleSignInCoordinator
+
+    init(authService: AuthService = FirebaseAuthService()) {
+        self.authService       = authService
+        self.googleCoordinator = GoogleSignInCoordinatorImpl(
+            clientID: AppConfig.googleClientID
+        )
     }
 
-    // MARK: – Auth -----------------------------------------------------
-    func makeGoogleSignInCoordinator() -> GoogleSignInCoordinator {
-        GoogleSignInCoordinatorImpl(clientID: AppConfig.googleClientID)
-    }
 
     func makeLoginViewModel() -> LoginViewModel {
         LoginViewModel(
             authService:       authService,
-            googleCoordinator: makeGoogleSignInCoordinator()
+            googleCoordinator: googleCoordinator
         )
     }
 
@@ -50,12 +47,8 @@ final class AppDependencyContainer {
 
     func makeEditorViewModel() -> EditorViewModel {
         EditorViewModel(
-            transformService: transformService,
-            filterService:    filterService,
-            composeService:   composeService,
-            textService:      textService,
-            exportService:    exportService
-
+            pipeline:       imagePipeline,
+            exportService:  exportService
         )
     }
 }

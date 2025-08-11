@@ -3,8 +3,8 @@ import SwiftUI
 
 struct ShareItem: Identifiable, Equatable {
     let id: UUID = UUID()
-    let url: URL
+    let image: UIImage
     static func == (lhs: ShareItem, rhs: ShareItem) -> Bool {
-        lhs.id == rhs.id && lhs.url == rhs.url
+        lhs.id == rhs.id
     }
 }

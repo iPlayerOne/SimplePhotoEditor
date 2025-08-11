@@ -1,16 +1,6 @@
-//
-//  CameraPicker.swift
-//  SimplePhotoEditor
-//
-//  Created by ikorobov on 23. 4. 2025..
-//
-
-
-// CameraPicker.swift
 import SwiftUI
 import UIKit
 
-/// Обёртка над UIImagePickerController для камеры
 struct CameraPicker: UIViewControllerRepresentable {
     var onImagePicked: (UIImage) -> Void
     @Environment(\.presentationMode) private var presentationMode
@@ -22,6 +12,7 @@ struct CameraPicker: UIViewControllerRepresentable {
     ) -> UIImagePickerController {
         let picker = UIImagePickerController()
         picker.sourceType = .camera
+        picker.modalPresentationStyle = .fullScreen
         picker.delegate   = context.coordinator
         return picker
     }

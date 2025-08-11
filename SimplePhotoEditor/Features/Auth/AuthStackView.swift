@@ -1,8 +1,5 @@
-// Features/Auth/AuthStackView.swift
-
 import SwiftUI
 
-/// Стек экранов для авторизации (Sign In / Sign Up / Reset Password)
 struct AuthStackView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var authRouter = AuthRouter()
@@ -19,10 +16,9 @@ struct AuthStackView: View {
 
     var body: some View {
         NavigationStack(path: $authRouter.path) {
-            // стартовый экран — LoginView с колбэком onSuccess
             LoginView(
                 vm: container.makeLoginViewModel(),
-                googleCoordinator: container.makeGoogleSignInCoordinator(),
+                googleCoordinator: container.googleCoordinator,
                 onSuccess: onLogin
             )
             .environmentObject(authRouter)

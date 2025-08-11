@@ -5,7 +5,7 @@ protocol PreviewRenderService {
   func renderPreview(
     data:            Data,
     filterName:      String?,
-    downscaleFactor: Double    // 0…1
+    downscaleFactor: Double
   ) throws -> UIImage
 }
 
@@ -22,32 +22,41 @@ final class PreviewRenderServiceImpl: PreviewRenderService {
     downscaleFactor: Double
   ) throws -> UIImage {
     return try queue.sync {
-      // 1) CIImage с учётом EXIF-ориентации
-      var ci = CIImage(
-        data:    data,
-        options: [.applyOrientationProperty: true]
-      )!
+      print("🖼️ [Preview] renderPreview begin: bytes=\(data.count), filter=\(filterName ?? "nil"), scale=\(downscaleFactor)")
 
-      // 2) Пользовательский фильтр (если есть)
-      if let name = filterName, !name.isEmpty,
-         let fx = CIFilter(name: name) {
+      guard var ci = CIImage(data: data, options: [.applyOrientationProperty: true]) else {
+        print("❌ [Preview] CIImage(data:) failed")
+        throw NSError(domain: "PreviewRender", code: -10)
+      }
+      print("🖼️ [Preview] input extent: \(ci.extent)")
+
+      if let name = filterName, !name.isEmpty, let fx = CIFilter(name: name) {
         fx.setValue(ci, forKey: kCIInputImageKey)
-        ci = fx.outputImage ?? ci
+        if let out = fx.outputImage {
+          ci = out
+          print("🖼️ [Preview] filter \(name) applied, extent: \(ci.extent)")
+        } else {
+          print("⚠️ [Preview] filter \(name) produced nil output — skipping")
+        }
       }
 
-      // 3) Даун-скейл Lanczos
-      if downscaleFactor < 0.999,
-         let lanczos = CIFilter(name: "CILanczosScaleTransform") {
-        lanczos.setValue(ci,               forKey: kCIInputImageKey)
-        lanczos.setValue(downscaleFactor,  forKey: kCIInputScaleKey)
-        lanczos.setValue(1.0,              forKey: kCIInputAspectRatioKey)
-        ci = lanczos.outputImage ?? ci
+      if downscaleFactor < 0.999, let lanczos = CIFilter(name: "CILanczosScaleTransform") {
+        lanczos.setValue(ci,              forKey: kCIInputImageKey)
+        lanczos.setValue(downscaleFactor, forKey: kCIInputScaleKey)
+        lanczos.setValue(1.0,             forKey: kCIInputAspectRatioKey)
+        if let out = lanczos.outputImage {
+          ci = out
+          print("🖼️ [Preview] downscaled by \(downscaleFactor), extent: \(ci.extent)")
+        } else {
+          print("⚠️ [Preview] lanczos produced nil output — skipping")
+        }
       }
 
-      // 4) Рендер в UIImage(.up)
       guard let cg = ctx.createCGImage(ci, from: ci.extent) else {
+        print("❌ [Preview] ctx.createCGImage failed")
         throw NSError(domain: "PreviewRender", code: -1)
       }
+      print("✅ [Preview] success cg: \(cg.width)x\(cg.height)")
       return UIImage(cgImage: cg)
     }
   }

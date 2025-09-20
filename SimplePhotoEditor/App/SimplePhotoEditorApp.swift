@@ -1,5 +1,3 @@
-// App/SimplePhotoEditorApp.swift
-
 import SwiftUI
 import FirebaseCore
 
@@ -11,12 +9,8 @@ struct SimplePhotoEditorApp: App {
     private let container: AppDependencyContainer
 
     init() {
-        // --- ОБЯЗАТЕЛЬНО первым делом на старте ---
         FirebaseApp.configure()
-
-        // Создаём единый инстанс AuthService
         let authService = FirebaseAuthService()
-        // Передаём его и в SessionStore, и в DI-контейнер
         let sessionStore = SessionStore(authService: authService)
         _session = StateObject(wrappedValue: sessionStore)
         container = AppDependencyContainer(authService: authService)
@@ -28,6 +22,10 @@ struct SimplePhotoEditorApp: App {
                 container: container,
                 onLogout:  { session.logout() }
             )
+            .onAppear {
+                let s = UIScreen.main
+                print("📱 scale=\(s.scale), nativeScale=\(s.nativeScale), bounds=\(s.bounds.size), nativeBounds=\(s.nativeBounds.size)")
+            }
             .environmentObject(session)
         }
     }

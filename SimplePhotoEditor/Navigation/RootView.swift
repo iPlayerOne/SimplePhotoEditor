@@ -21,14 +21,15 @@ struct RootView: View {
             else if session.isAuthenticated {
                 EditorView(
                     vm:       container.makeEditorViewModel(),
-                    onShare:  { Task { try? await container.makeEditorViewModel().exportFinalImage() } },
+                    cameraAccess: container.cameraAccessService,
+//                    onShare:  { Task { try? await container.makeEditorViewModel().exportFinalImage() } },
                     onLogout: onLogout
                 )
             }
             else {
                 AuthStackView(
                     container: container,
-                    onLogin:   { /* после логина обновится session.isAuthenticated */ }
+                    onLogin:   {  }
                 )
             }
         }

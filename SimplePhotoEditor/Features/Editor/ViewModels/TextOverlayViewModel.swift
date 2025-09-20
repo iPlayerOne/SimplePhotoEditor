@@ -1,27 +1,6 @@
 import SwiftUI
 import Combine
 
-fileprivate struct CanvasFrame {
-    let canvas: CGSize
-    let minY: CGFloat
-    let maxY: CGFloat
-    
-    init(canvas: CGSize, keyboard: CGFloat, imageSize: CGSize?, textH: CGFloat = 44, margin: CGFloat = 8 ) {
-        let imgW = imageSize?.width  ?? canvas.width
-        let imgH = imageSize?.height ?? canvas.height
-        
-        let dispH = imgW / imgH > canvas.width / canvas.height
-        ? canvas.width  / (imgW / imgH)
-        : canvas.height
-        
-        let vInset = (canvas.height - dispH) / 2
-        minY = vInset + textH/2 + margin
-        maxY = canvas.height - vInset - textH/2 - margin - keyboard
-        self.canvas = canvas
-    }
-    
-}
-
 @MainActor
 final class TextOverlayViewModel: ObservableObject {
     
@@ -48,7 +27,16 @@ final class TextOverlayViewModel: ObservableObject {
     
     func placeText(in canvas: CGSize, keyboardH: CGFloat, imageSize: CGSize?) {
         let frame = CanvasFrame(canvas: canvas, keyboard: keyboardH, imageSize: imageSize)
-        let y = (frame.minY + frame.maxY) / 2
+        let gapAboveKeyboard: CGFloat = 12
+        
+        let y: CGFloat
+        
+        if keyboardH > 0 {
+            y = max(frame.minY, frame.maxY - gapAboveKeyboard)
+        } else {
+            y = frame.canvas.height / 2
+        }
+        
         let p = CGPoint(x: canvas.width / 2, y: y)
         
         let item = TextItem(text: "Текст",
@@ -144,4 +132,31 @@ extension TextOverlayViewModel {
         case size(CGFloat)
         case color(Color)
     }
+}
+
+fileprivate struct CanvasFrame {
+    let canvas: CGSize
+    let minY: CGFloat
+    let maxY: CGFloat
+    
+    init(canvas: CGSize, keyboard: CGFloat, imageSize: CGSize?, textH: CGFloat = 44, margin: CGFloat = 8 ) {
+        let canvasRect = CGRect(origin: .zero, size: canvas)
+        let fit = aspectFitRect(aspect: imageSize ?? canvas, in: canvasRect)
+        
+        let vInset = fit.minY
+        
+        minY = vInset + textH/2 + margin
+        maxY = canvas.height - vInset - textH/2 - margin - keyboard
+        self.canvas = canvas
+        
+        print("🧮 CanvasFrame",
+                     "canvas:", canvas,
+                     "image:", imageSize ?? .zero,
+                     "fit:", fit,
+                     "vInset:", vInset.rounded(),
+                     "kbd:", keyboard.rounded(),
+                     "minY:", minY.rounded(),
+                     "maxY:", maxY.rounded())
+    }
+    
 }

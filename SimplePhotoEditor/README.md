@@ -1,5 +1,25 @@
 # SimplePhotoEditor
 
+Приложение для iOS (SwiftUI, MVVM) с авторизацией (Email/Google) и простым фоторедактором: кадрирование/трансформации, фильтры Core Image, рисование PencilKit, текстовые слои и экспорт.
+
+## Быстрый старт
+1) Откройте `SimplePhotoEditor.xcodeproj` в Xcode.
+2) Через SPM установите зависимости (если Xcode предложит).
+3) Создайте проект в Firebase и скачайте `GoogleService-Info.plist` в корень таргета.
+4) Включите Sign-In with Google в Firebase, добавьте URL Schemes из `GoogleService-Info.plist` в `Info.plist` таргета.
+5) Запустите на iOS 15+ симуляторе или устройстве.
+
+## Возможности
+- Авторизация: email/пароль, Google, сброс пароля.
+- Редактор: фильтры Core Image, поворот/зеркалирование, PencilKit-рисование, текстовые слои, экспорт/ShareSheet.
+- Производительность: кеш превью фильтров, оптимизированный пайплайн CI, безопасное декодирование UIImage.
+
+## Архитектура
+- **UI**: SwiftUI, feature-модули `Auth` и `Editor`.
+- **Состояние**: `SessionStore` (наблюдение за auth), `EditorViewModel` и `TextOverlayViewModel`.
+- **Сервисы**: `Auth`, `Processing` (фильтры, пайплайн, композиция, трансформации), `Export`, `Camera`.
+- **Внедрение зависимостей**: `DependencyContainer` в `App/`.
+
 ## Структура проекта
 
 ```
@@ -8,55 +28,120 @@ SimplePhotoEditor/
 │   ├── AppDelegate.swift
 │   ├── AppConfig.swift
 │   ├── DependencyContainer.swift
+│   ├── Info.plist
 │   └── SimplePhotoEditorApp.swift
-├── AppDependency/
-│   └── AppDependencyContainer.swift
+├── Assets.xcassets/
 ├── Core/
-│   ├── Extensions/
 │   ├── Models/
-│   ├── Protocols/
+│   │   ├── Filter.swift
+│   │   ├── Photo.swift
+│   │   ├── ShareItem.swift
+│   │   ├── Stroke.swift
+│   │   ├── TextItem.swift
+│   │   └── User.swift
 │   ├── Services/
 │   │   ├── Auth/
-│   │   ├── Processing/
-│   │   └── State/
+│   │   │   ├── AuthError.swift
+│   │   │   └── FirebaseAuthService.swift
+│   │   ├── Camera/
+│   │   │   └── CameraService.swift
+│   │   ├── Export/
+│   │   │   └── ExportService.swift
+│   │   └── Processing/
+│   │       ├── CIContextPool.swift
+│   │       ├── CIHelpers.swift
+│   │       ├── DrawService.swift
+│   │       ├── FilterProvider.swift
+│   │       ├── FilterService.swift
+│   │       ├── ImageComposeService.swift
+│   │       ├── ImageDecodeService.swift
+│   │       ├── ImagePipeline.swift
+│   │       ├── OverlayRenderService.swift
+│   │       ├── PhotoProcessingService.swift
+│   │       ├── PreviewRenderService.swift
+│   │       ├── TextOverlay.swift
+│   │       └── TransformService.swift
+│   ├── State/
+│   │   ├── AppState.swift
+│   │   └── SessionStore.swift
 │   └── Utilities/
+│       ├── CanvasMetrics.swift
+│       ├── Extensions/
+│       │   ├── Color+UIColor.swift
+│       │   ├── Image+Filter.swift
+│       │   └── String+CamelCase.swift
+│       ├── FilterWidthKey.swift
+│       ├── GeometryHelper.swift
+│       ├── KeyboardObserver.swift
+│       ├── Modifiers/
+│       │   ├── AlertModifier.swift
+│       │   ├── Draggable.swift
+│       │   ├── IconStyle.swift
+│       │   ├── Liftable.swift
+│       │   ├── PanelSurface.swift
+│       │   ├── ShimmerModifier.swift
+│       │   └── UnderlineModifier.swift
+│       ├── ShareSheet.swift
+│       └── UIImage+SafeDecode.swift
 ├── Features/
 │   ├── Auth/
 │   │   ├── Components/
+│   │   │   ├── AuthButtonStyle.swift
+│   │   │   ├── AuthFieldModifier.swift
+│   │   │   ├── AuthTextField.swift
+│   │   │   └── PrimaryActionButton.swift
 │   │   ├── ViewModels/
+│   │   │   ├── LoginViewModel.swift
+│   │   │   ├── RegistrationViewModel.swift
+│   │   │   └── ResetPasswordViewModel.swift
+│   │   ├── AuthRoute.swift
+│   │   ├── AuthRouter.swift
 │   │   ├── AuthStackView.swift
+│   │   ├── GoogleSignInCoordinator.swift
 │   │   ├── LoginView.swift
 │   │   ├── RegistrationView.swift
 │   │   └── ResetPasswordView.swift
 │   └── Editor/
+│       ├── CameraPicker.swift
 │       ├── Components/
+│       │   ├── FilterTools/
+│       │   │   └── FilterPreviewImage.swift
+│       │   ├── KeyboardAccessory/
+│       │   │   ├── AccessoryHostingController.swift
+│       │   │   └── KeyboardAccessory.swift
 │       │   ├── Preview/
-│       │   │   ├── PhotoLayer.swift
+│       │   │   ├── CanvasLayer.swift
 │       │   │   ├── PencilCanvasView.swift
+│       │   │   ├── PhotoLayer.swift
 │       │   │   ├── PreviewArea.swift
 │       │   │   ├── TextItemView.swift
-│       │   │   └── TextOverlayLayer.swift
+│       │   │   ├── TextOverlayLayer.swift
+│       │   │   └── ZoomableView.swift
+│       │   ├── Tab/
+│       │   │   ├── ModeButton.swift
+│       │   │   └── ModeTabBar.swift
 │       │   └── Tools/
-│       │       ├── EditorNavigationBar.swift
-│       │       ├── ImageSourcePicker.swift
-│       │       ├── ModeTabBar.swift
+│       │       ├── DrawToolsPanel.swift
+│       │       ├── EditorTopBar.swift
+│       │       ├── FilterPreviewCache.swift
+│       │       ├── FilterToolsPanel.swift
 │       │       ├── TextToolsToolbar.swift
 │       │       ├── ToolsPanel.swift
-│       │       └── TopToolsPanel.swift
+│       │       └── TopToolControls.swift
+│       ├── EditModeSelector.swift
+│       ├── EditorNavigationBar.swift
+│       ├── EditorStates.swift
+│       ├── EditorView.swift
+│       ├── ImageSourcePicker.swift
 │       ├── Models/
-│       │   ├── EditorMode.swift
-│       │   └── TextItem.swift
-│       ├── Utilities/
-│       │   └── KeyboardObserver.swift
-│       ├── ViewModels/
-│       │   ├── EditorViewModel.swift
-│       │   └── TextOverlayViewModel.swift
-│       └── EditorView.swift
+│       │   └── EditorMode.swift
+│       └── ViewModels/
+│           ├── EditorViewModel.swift
+│           └── TextOverlayViewModel.swift
 ├── Navigation/
 │   └── RootView.swift
-├── Assets.xcassets/
-├── Info.plist
-└── GoogleService-Info.plist
+├── GoogleService-Info.plist
+└── README.md
 ```
 
 ## Файлы редактора
@@ -64,26 +149,41 @@ SimplePhotoEditor/
 ### Компоненты редактора
 
 #### Preview/
+- `CanvasLayer.swift` - Слой холста, объединяющий подслои
 - `PhotoLayer.swift` - Слой для отображения фотографии
 - `PencilCanvasView.swift` - Холст для рисования с поддержкой PencilKit
-- `PreviewArea.swift` - Основная область предпросмотра, объединяющая все слои
+- `PreviewArea.swift` - Основная область предпросмотра
 - `TextItemView.swift` - Представление для отдельного текстового элемента
 - `TextOverlayLayer.swift` - Слой для управления текстовыми элементами
+- `ZoomableView.swift` - Зум и панорамирование предпросмотра
 
 #### Tools/
-- `EditorNavigationBar.swift` - Навигационная панель редактора
-- `ImageSourcePicker.swift` - Выбор источника изображения (камера/галерея)
-- `ModeTabBar.swift` - Панель переключения режимов редактирования
-- `TextToolsToolbar.swift` - Панель инструментов для работы с текстом
+- `DrawToolsPanel.swift` - Инструменты рисования (кисть/ластик/толщина/цвет)
+- `EditorTopBar.swift` - Верхняя панель инструментов редактора
+- `FilterToolsPanel.swift` - Панель превью и выбора фильтров
+- `FilterPreviewCache.swift` - Кеширование превью фильтров
+- `TextToolsToolbar.swift` - Инструменты редактирования текста
 - `ToolsPanel.swift` - Основная панель инструментов
-- `TopToolsPanel.swift` - Верхняя панель инструментов
+- `TopToolControls.swift` - Общие кнопки управления сверху
+
+#### KeyboardAccessory/
+- `AccessoryHostingController.swift` - Хостинг SwiftUI над клавиатурой
+- `KeyboardAccessory.swift` - Кастомный аксессуар над клавиатурой
+
+#### Tab/
+- `ModeButton.swift` - Кнопка режима
+- `ModeTabBar.swift` - Переключение режимов редактирования
 
 ### Модели
-- `EditorMode.swift` - Перечисление режимов редактирования
-- `TextItem.swift` - Модель текстового элемента
+- `EditorMode.swift` (Features/Editor/Models) - Режимы редактирования
+- `TextItem.swift` (Core/Models) - Текстовый элемент
 
 ### Утилиты
 - `KeyboardObserver.swift` - Наблюдатель за состоянием клавиатуры
+- `CanvasMetrics.swift` - Подсчёт размеров холста/масштабов
+- `GeometryHelper.swift` - Геометрические преобразования/ограничения
+- `PanelSurface.swift` - Стиль поверхности панелей
+- Расширения: `Color+UIColor.swift`, `Image+Filter.swift`, `String+CamelCase.swift`
 
 ### ViewModels
 - `EditorViewModel.swift` - Основная модель представления редактора

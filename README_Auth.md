@@ -41,14 +41,80 @@ SimplePhotoEditor/
 
 ## Flow авторизации и регистрации
 
-1. **Пользователь открывает приложение**
-2. Проверяется состояние сессии (`SessionStore`)
-3. Если пользователь не авторизован — показывается стек авторизации:
-    - Вход по email/паролю
-    - Вход через Google
-    - Регистрация нового пользователя
-    - Восстановление пароля
-4. После успешной авторизации — переход к основному функционалу приложения
+### 1. Инициализация приложения
+1. **Запуск приложения** → `SimplePhotoEditorApp.init()`
+2. **Настройка Firebase** → `FirebaseApp.configure()`
+3. **Создание сервисов**:
+   - `FirebaseAuthService()` — основной сервис авторизации
+   - `SessionStore(authService)` — управление состоянием сессии
+   - `AppDependencyContainer(authService)` — DI-контейнер
+4. **Проверка текущего пользователя** → `Auth.auth().currentUser`
+
+### 2. Определение состояния авторизации
+1. **Синхронная проверка** → `SessionStore.init()` проверяет `Auth.auth().currentUser != nil`
+2. **Асинхронное наблюдение** → подписка на `authService.authStatePublisher`
+3. **Установка флагов**:
+   - `isAuthenticated` — статус авторизации
+   - `didFinishChecking` — завершена ли проверка состояния
+
+### 3. Навигация по состояниям (RootView)
+```
+if !session.didFinishChecking {
+    ProgressView() // Показываем загрузку
+}
+else if session.isAuthenticated {
+    EditorView() // Переход в редактор
+}
+else {
+    AuthStackView() // Показываем формы авторизации
+}
+```
+
+### 4. Flow входа через Email/Пароль
+1. **Пользователь вводит данные** → `LoginView`
+2. **Валидация** → `LoginViewModel.canSignIn` проверяет email и пароль (≥6 символов)
+3. **Вызов API** → `authService.signIn(email, password)`
+4. **Обработка результата**:
+   - ✅ **Успех** → `SessionStore.authStatePublisher` получает пользователя → переход в `EditorView`
+   - ❌ **Ошибка** → показ `AuthError` через `.alertLocalizedError`
+
+### 5. Flow входа через Google
+1. **Нажатие кнопки Google** → `GoogleSignInButton`
+2. **Инициализация координатора** → `GoogleSignInCoordinatorImpl`
+3. **Вызов Google SDK** → `GIDSignIn.sharedInstance.signIn()`
+4. **Получение токенов** → `idToken` и `accessToken`
+5. **Авторизация в Firebase** → `authService.signInWithGoogle(idToken, accessToken)`
+6. **Результат** → аналогично email/паролю
+
+### 6. Flow регистрации
+1. **Переход на регистрацию** → `AuthRouter.path.append(.signUp)`
+2. **Ввод данных** → `RegistrationView` с полями email, пароль, подтверждение пароля
+3. **Валидация** → `RegistrationViewModel.canRegister` проверяет:
+   - Email содержит "@" и "."
+   - Пароль ≥ 6 символов
+   - Пароли совпадают
+4. **Создание аккаунта** → `authService.register(email, password)`
+5. **Отправка верификации** → `result.user.sendEmailVerification()`
+6. **Уведомление** → показ алерта "Письмо отправлено"
+
+### 7. Flow восстановления пароля
+1. **Переход на сброс** → `AuthRouter.path.append(.resetPassword)`
+2. **Ввод email** → `ResetPasswordView`
+3. **Валидация** → `ResetPasswordViewModel.canReset` проверяет email
+4. **Отправка письма** → `authService.resetPassword(email)`
+5. **Уведомление** → показ алерта "Проверьте почту"
+
+### 8. Flow выхода
+1. **Нажатие кнопки выхода** → `onLogout()` колбэк
+2. **Выход из Firebase** → `authService.signOut()`
+3. **Обновление состояния** → `SessionStore.authStatePublisher` получает `nil`
+4. **Переход к авторизации** → показ `AuthStackView`
+
+### 9. Обработка ошибок
+- **Сетевые ошибки** → `AuthError.networkError(underlying)`
+- **Firebase ошибки** → маппинг в `AuthError` (неверный пароль, пользователь не найден и т.д.)
+- **Google ошибки** → `AuthError.popupClosedByUser`, `AuthError.invalidCredential`
+- **Отображение** → через `.alertLocalizedError($vm.error)` с локализованными сообщениями
 
 ---
 
@@ -1228,3 +1294,130 @@ struct RootView: View {
     }
 }
 ```
+
+---
+
+## Исходный код Core/Utilities
+
+### KeyboardObserver.swift
+```swift
+import SwiftUI
+import Combine
+
+class KeyboardObserver: ObservableObject {
+    @Published var height: CGFloat = 0
+    
+    private var cancellables = Set<AnyCancellable>()
+    
+    init() {
+        NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
+            .compactMap { notification in
+                notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect
+            }
+            .map { $0.height }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] height in
+                self?.height = height
+            }
+            .store(in: &cancellables)
+        
+        NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.height = 0
+            }
+            .store(in: &cancellables)
+    }
+}
+```
+
+### ShareSheet.swift
+```swift
+import SwiftUI
+
+struct ShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
+    
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: items, applicationActivities: nil)
+    }
+    
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+```
+
+### FilterWidthKey.swift
+```swift
+import SwiftUI
+
+struct FilterWidthKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+```
+
+### CanvasMetrics.swift
+```swift
+import SwiftUI
+
+struct CanvasMetrics {
+    let canvasSize: CGSize
+    let imageSize: CGSize?
+    let keyboardHeight: CGFloat
+    
+    var displaySize: CGSize {
+        guard let imageSize = imageSize else { return canvasSize }
+        
+        let imageAspect = imageSize.width / imageSize.height
+        let canvasAspect = canvasSize.width / canvasSize.height
+        
+        if imageAspect > canvasAspect {
+            let height = canvasSize.width / imageAspect
+            return CGSize(width: canvasSize.width, height: height)
+        } else {
+            let width = canvasSize.height * imageAspect
+            return CGSize(width: width, height: canvasSize.height)
+        }
+    }
+    
+    var verticalInset: CGFloat {
+        (canvasSize.height - displaySize.height) / 2
+    }
+}
+```
+
+### GeometryHelper.swift
+```swift
+import SwiftUI
+
+struct GeometryHelper {
+    static func centerPoint(in rect: CGRect) -> CGPoint {
+        CGPoint(x: rect.midX, y: rect.midY)
+    }
+    
+    static func distance(from point1: CGPoint, to point2: CGPoint) -> CGFloat {
+        sqrt(pow(point2.x - point1.x, 2) + pow(point2.y - point1.y, 2))
+    }
+}
+```
+
+### UIImage+SafeDecode.swift
+```swift
+import UIKit
+
+extension UIImage {
+    static func safeDecode(from data: Data) -> UIImage? {
+        guard let image = UIImage(data: data) else { return nil }
+        
+        if image.cgImage != nil {
+            return image
+        }
+        
+        // Попытка исправить проблему с ориентацией
+        guard let cgImage = image.cgImage else { return nil }
+        return UIImage(cgImage: cgImage, scale: image.scale, orientation: image.imageOrientation)
+    }
+}

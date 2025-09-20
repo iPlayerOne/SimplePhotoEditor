@@ -4,7 +4,7 @@ import PencilKit
 
 @MainActor
 final class EditorViewModel: ObservableObject {
-    @Published var markup: MarkupTool = .none
+    @Published var mode: EditorMode = .filters
     @Published var inputData: Data?
     @Published private(set) var previewImage: UIImage? = nil
     @Published private(set) var originalImage: UIImage? = nil
@@ -55,21 +55,26 @@ final class EditorViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
+    func setMode(_ newMode: EditorMode) {
+        guard newMode != mode else { return }
+        applyMode(from: mode, to: newMode)
+        mode = newMode
+    }
     
+    func toogleMode(_ target: EditorMode) {
+        setMode(mode == target ? .filters : target)
+    }
     
     func startDraw() {
-        markup = .draw
-        textVM.finishEditing()
+        toogleMode(.draw)
     }
     
     func startText() {
-        markup = .text
-        textVM.enterPlacement()
+        toogleMode(.text)
     }
     
     func finishMarkup() {
-        markup = .none
-        textVM.finishEditing()
+        setMode(.filters)
     }
     
     func updateKeyboard(h: CGFloat) {
@@ -97,6 +102,16 @@ final class EditorViewModel: ObservableObject {
         shareItem = nil
     }
     
+    private func applyMode(from old: EditorMode, to new: EditorMode) {
+        if new == .text, old != .text {
+            textVM.enterPlacement()
+        }
+        
+        if old == .text, new != .text {
+            textVM.finishEditing()
+        }
+    }
+    
     private func updatePreview(raw: Data?, filter: Filter?) async {
         guard let data = raw else {
             previewImage = nil
@@ -119,7 +134,7 @@ final class EditorViewModel: ObservableObject {
             throw OverlayRenderError.invalidBase
         }
         return try await pipeline.makeFinalImage(
-            from: inputData ?? Data(),
+            from: data,
             filterName: selectedFilter?.filterName,
             rotation: rotationCount,
             isFlipped: isFlippedHorizontally,

@@ -9,6 +9,8 @@ final class AppDependencyContainer {
     private let decodeService    = ImageDecodeServiceImpl()
     private let previewService   = PreviewRenderServiceImpl()
     private let exportService    = ExportServiceImpl()
+    
+    let cameraAccessService: CameraAccess = CameraAccessService()
 
     private lazy var imagePipeline: ImagePipeline = {
         ImagePipelineImpl(
@@ -23,6 +25,7 @@ final class AppDependencyContainer {
     let googleCoordinator: GoogleSignInCoordinator
 
     init(authService: AuthService = FirebaseAuthService()) {
+        _ = CIContextPool.shared
         self.authService       = authService
         self.googleCoordinator = GoogleSignInCoordinatorImpl(
             clientID: AppConfig.googleClientID

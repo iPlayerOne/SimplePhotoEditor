@@ -43,14 +43,97 @@ SimplePhotoEditor/
 
 ## Flow работы редактора
 
-1. Пользователь выбирает или делает фото (через `CameraPicker` или `ImageSourcePicker`)
-2. Открывается редактор (`EditorView`)
-3. Доступны инструменты:
-    - Рисование (PencilKit)
-    - Добавление и редактирование текста
-    - Применение фильтров и трансформаций
-    - Экспорт и сохранение результата
-4. Все изменения применяются к модели фото и отображаются в preview
+### 1. Инициализация редактора
+1. **Переход в редактор** → `EditorView` загружается после успешной авторизации
+2. **Создание ViewModels**:
+   - `EditorViewModel` — основная логика редактора
+   - `TextOverlayViewModel` — управление текстовыми слоями
+   - `KeyboardObserver` — отслеживание клавиатуры
+   - `FilterPreviewCache` — кеширование превью фильтров
+3. **Инициализация состояния** → все инструменты в режиме `.none`
+
+### 2. Flow выбора изображения
+1. **Нажатие кнопки "+"** → `showSourceDialog = true`
+2. **Выбор источника** → `ImageSourcePicker` показывает диалог:
+   - "Камера" → `CameraPicker` (UIImagePickerController)
+   - "Галерея" → `PhotosPicker` (PhotosUI)
+3. **Получение данных**:
+   - **Камера** → `CameraPicker.onImagePicked(UIImage)` → JPEG data
+   - **Галерея** → `PhotosPicker.loadTransferable(Data.self)` → исходные данные
+4. **Обновление модели** → `vm.inputData = data`
+
+### 3. Flow обработки изображения
+1. **Получение данных** → `EditorViewModel.inputData` обновляется
+2. **Декодирование** → `ImageDecodeService.downsample()` для превью (600px)
+3. **Применение фильтров** → `PreviewRenderService.renderPreview()` с downscale 0.25
+4. **Обновление UI** → `previewImage` обновляется через `@Published`
+
+### 4. Flow работы с фильтрами
+1. **Подготовка превью** → `FilterPreviewCache.preparePreviews()` для всех фильтров
+2. **Отображение панели** → `FilterToolsPanel` показывает горизонтальный скролл
+3. **Выбор фильтра** → `FilterPreviewImage.onTap()` → `selectedFilter = filter`
+4. **Обновление превью** → `EditorViewModel` автоматически применяет фильтр
+5. **Кеширование** → превью сохраняются в `FilterPreviewCache` для быстрого доступа
+
+### 5. Flow рисования (PencilKit)
+1. **Активация режима** → `ToolsPanel` → кнопка "pencil.tip" → `vm.startDraw()`
+2. **Переключение режима** → `vm.markup = .draw`
+3. **Отображение холста** → `PencilCanvasView` становится видимым
+4. **Настройка инструментов** → `DrawToolsPanel`:
+   - **Цвет** → `ColorPicker` → `PKInkingTool(.pen, color: newColor)`
+   - **Толщина** → `Slider` → `PKInkingTool(.pen, width: newWidth)`
+   - **Ластик** → `isErasing.toggle()` → `PKInkingTool(.eraser)`
+5. **Очистка** → кнопка "trash" → `drawing = PKDrawing()`
+
+### 6. Flow работы с текстом
+1. **Активация режима** → `ToolsPanel` → кнопка "textformat" → `vm.startText()`
+2. **Переключение режима** → `vm.markup = .text` → `textVM.enterPlacement()`
+3. **Ожидание клавиатуры** → `waitForKeyboard = true`
+4. **Появление клавиатуры** → `KeyboardObserver` → `textVM.keyboardDidChange()`
+5. **Размещение текста** → `placeText()` создает `TextItem` в центре над клавиатурой
+6. **Редактирование** → `TextItemView.onTapGesture()` → `textVM.setActive(editing: true)`
+7. **Настройка текста** → `TextToolsToolbar`:
+   - **Цвет** → `ColorPicker` → `textVM.apply(.color(newColor))`
+   - **Размер** → `Stepper` → `textVM.apply(.size(newSize))`
+8. **Завершение** → кнопка "Готово" → `textVM.finishEditing()`
+9. **Перемещение** → `TextItemView.draggable()` позволяет перетаскивать текст
+
+### 7. Flow трансформаций
+1. **Поворот** → `TopToolControls` → кнопка "rotate.right" → `vm.rotationCount = (vm.rotationCount + 1) % 4`
+2. **Отражение** → кнопка "flip.horizontal" → `vm.isFlippedHorizontally.toggle()`
+3. **Применение** → изменения автоматически отражаются в превью через `EditorViewModel`
+
+### 8. Flow экспорта и шаринга
+1. **Экспорт в галерею** → кнопка "square.and.arrow.up" → `vm.share(drawingOverlay: drawing)`
+2. **Рендеринг финального изображения** → `renderFinalImage()`:
+   - Применение фильтра → `FilterService.apply()`
+   - Наложение слоев → `OverlayRenderService.apply(drawing, text)`
+   - Поворот → `TransformService.rotate90()`
+   - Отражение → `TransformService.flipHorizontal()`
+3. **Создание ShareItem** → `ShareItem(image: UIImage)`
+4. **Показ ShareSheet** → `UIActivityViewController` с возможностью:
+   - Сохранения в фотопоток
+   - Отправки в другие приложения
+   - Копирования в буфер обмена
+
+### 9. Flow управления клавиатурой
+1. **Наблюдение** → `KeyboardObserver` отслеживает `keyboardWillShow/Hide`
+2. **Обновление состояния** → `vm.updateKeyboard(h: height)`
+3. **Адаптация текста** → `TextOverlayViewModel.keyboardDidChange()`:
+   - При появлении → размещение нового текста или перемещение активного
+   - При исчезновении → возврат в исходные позиции
+4. **Кастомный тулбар** → `TextToolsToolbar` показывается только при редактировании текста
+
+### 10. Flow обработки состояний
+1. **Реактивность** → все изменения через `@Published` свойства
+2. **Debouncing** → `Publishers.CombineLatest($inputData, $selectedFilter).debounce(120ms)`
+3. **Асинхронная обработка** → `Task.detached(priority: .userInitiated)` для тяжелых операций
+4. **Обработка ошибок** → try-catch блоки с fallback на исходное изображение
+
+### 11. Flow очистки ресурсов
+1. **Смена изображения** → `vm.inputData` → `textVM.reset()` очищает текстовые слои
+2. **Выход из редактора** → автоматическая очистка через `deinit`
+3. **Очистка кеша** → `FilterPreviewCache` управляет памятью превью фильтров
 
 ---
 
@@ -1204,7 +1287,7 @@ struct EditorView: View {
 extension EditorView {
     @ViewBuilder private var topTools: some View {
         if vm.originalImage != nil {
-            TopToolsPanel(vm: vm)
+            EditorTopBar(vm: vm)
         }
     }
     
@@ -1244,13 +1327,6 @@ extension EditorView {
             showSourceDialog: $showSourceDialog,
             isShareEnabled: vm.previewImage != nil,
             onShare: {
-//                print("➡️ share tapped")
-//                let uiImage = drawing.image(from: drawing.bounds, scale: UIScreen.main.scale)
-//                if let overlay = uiImage.pngData() {
-//                    vm.share(drawingOverlay: overlay)
-//                } else {
-//                    vm.share(drawingOverlay: nil)
-//                }
                 vm.share(drawingOverlay: drawing)
             },
             onLogout: onLogout
@@ -1335,45 +1411,45 @@ struct ImageSourcePicker: View {
     var body: some View {
         Color.clear
             .confirmationDialog("Источник изображения",
-                                isPresented: $showDialog) {
+                              isPresented: $showDialog) {
                 Button("Камера")  { openCamera() }
                 Button("Галерея") { showLibrary = true }
                 Button("Отмена", role: .cancel) { }
             }
-                                .fullScreenCover(isPresented: $showCamera) {
-                                    CameraPicker { uiImage in
-                                        if let data = uiImage.jpegData(compressionQuality: 1.0) {
-                                            onImagePicked(data)
-                                        }
-                                        showCamera = false
-                                    }
-                                    .ignoresSafeArea()
-                                }
-                                .photosPicker(isPresented: $showLibrary,
-                                              selection:    $libraryItem,
-                                              matching:     .images,
-                                              photoLibrary: .shared())
-                                .onChange(of: libraryItem) { oldItem, newItem in
-                                    guard let item = newItem else { return }
-                                    Task {
-                                        if let data = try? await item.loadTransferable(type: Data.self) {
-                                            onImagePicked(data)
-                                        }
-                                        libraryItem = nil
-                                        showLibrary = false
-                                    }
-                                }
-                                .alert("Нет доступа к камере",
-                                       isPresented: $showPermissionAlert) {
-                                    Button("Настройки") {
-                                        if let url = URL(string: UIApplication.openSettingsURLString) {
-                                            UIApplication.shared.open(url)
-                                        }
-                                    }
-                                    Button("Отмена", role: .cancel) { }
-                                } message: {
-                                    Text("Разрешите доступ к камере в настройках устройства.")
-                                }
+                              .fullScreenCover(isPresented: $showCamera) {
+                                  CameraPicker { uiImage in
+                                      if let data = uiImage.jpegData(compressionQuality: 1.0) {
+                                          onImagePicked(data)
+                                      }
+                                      showCamera = false
+                                  }
+                                  .ignoresSafeArea()
+                              }
+                              .photosPicker(isPresented: $showLibrary,
+                                            selection:    $libraryItem,
+                                            matching:     .images,
+                                            photoLibrary: .shared())
+                              .onChange(of: libraryItem) { oldItem, newItem in
+                                  guard let item = newItem else { return }
+                                  Task {
+                                      if let data = try? await item.loadTransferable(type: Data.self) {
+                                          onImagePicked(data)
+                                      }
+                                      libraryItem = nil
+                                      showLibrary = false
+                                  }
+                              }
+                              .alert("Нет доступа к камере",
+                                     isPresented: $showPermissionAlert) {
+                                  Button("Настройки") {
+                                      if let url = URL(string: UIApplication.openSettingsURLString) {
+                                          UIApplication.shared.open(url)
+                                      }
+                                  }
+                                  Button("Отмена", role: .cancel) { }
+                              } message: {
+                                  Text("Разрешите доступ к камере в настройках устройства.")
+                              }
     }
     
     private func openCamera() {
@@ -1475,45 +1551,557 @@ enum MarkupTool: CaseIterable, Identifiable {
 
 ---
 
-## Исходный код Navigation
+## Исходный код Features/Editor/Components
 
-### RootView.swift
+### Preview/PreviewArea.swift
 ```swift
-// Navigation/RootView.swift
-
 import SwiftUI
+import PencilKit
 
-struct RootView: View {
-    @EnvironmentObject private var session: SessionStore
-    let container:             AppDependencyContainer
-    let onLogout:              () -> Void
-
-    init(container: AppDependencyContainer, onLogout: @escaping () -> Void) {
-        self.container = container
-        self.onLogout  = onLogout
-    }
-
+struct PreviewArea: View {
+    @ObservedObject var vm: EditorViewModel
+    @ObservedObject var textVM: TextOverlayViewModel
+    
+    @Binding var drawing: PKDrawing
+    @Binding var tool: PKInkingTool
+    @Binding var isErasing: Bool
+    @Binding var showSourceDialog: Bool
+    
     var body: some View {
-        NavigationStack {
-            if !session.didFinishChecking {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+        GeometryReader { geo in
+            ZStack {
+                if let image = vm.previewImage {
+                    PhotoLayer(image: image)
+                } else {
+                    placeholderLayer
+                }
+                
+                if vm.markup == .draw {
+                    PencilCanvasView(
+                        drawing: $drawing,
+                        tool: $tool,
+                        isErasing: $isErasing
+                    )
+                }
+                
+                if vm.markup == .text {
+                    TextOverlayLayer(
+                        textVM: textVM,
+                        canvasSize: geo.size
+                    )
+                }
             }
-            else if session.isAuthenticated {
-                EditorView(
-                    vm:       container.makeEditorViewModel(),
-                    onShare:  { Task { try? await container.makeEditorViewModel().exportFinalImage() } },
-                    onLogout: onLogout
-                )
+            .onAppear {
+                vm.canvasSize = geo.size
             }
-            else {
-                AuthStackView(
-                    container: container,
-                    onLogin:   { /* после логина обновится session.isAuthenticated */ }
-                )
+            .onChange(of: geo.size) { _, newSize in
+                vm.canvasSize = newSize
             }
         }
-        .environmentObject(session)
+        .aspectRatio(contentMode: .fit)
+        .background(Color.black.opacity(0.1))
+        .onTapGesture {
+            if vm.markup == .none {
+                showSourceDialog = true
+            }
+        }
+    }
+    
+    private var placeholderLayer: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "photo")
+                .font(.system(size: 48))
+                .foregroundColor(.secondary)
+            Text("Нажмите + чтобы добавить фото")
+                .font(.headline)
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+```
+
+### Preview/PhotoLayer.swift
+```swift
+import SwiftUI
+
+struct PhotoLayer: View {
+    let image: UIImage
+    
+    var body: some View {
+        Image(uiImage: image)
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+```
+
+### Preview/PencilCanvasView.swift
+```swift
+import SwiftUI
+import PencilKit
+
+struct PencilCanvasView: UIViewRepresentable {
+    @Binding var drawing: PKDrawing
+    @Binding var tool: PKInkingTool
+    @Binding var isErasing: Bool
+    
+    func makeUIView(context: Context) -> PKCanvasView {
+        let canvas = PKCanvasView()
+        canvas.drawing = drawing
+        canvas.tool = isErasing ? PKInkingTool(.eraser) : tool
+        canvas.backgroundColor = .clear
+        canvas.isOpaque = false
+        return canvas
+    }
+    
+    func updateUIView(_ uiView: PKCanvasView, context: Context) {
+        uiView.drawing = drawing
+        uiView.tool = isErasing ? PKInkingTool(.eraser) : tool
+    }
+}
+```
+
+### Preview/TextOverlayLayer.swift
+```swift
+import SwiftUI
+
+struct TextOverlayLayer: View {
+    @ObservedObject var textVM: TextOverlayViewModel
+    let canvasSize: CGSize
+    
+    var body: some View {
+        ForEach(textVM.items) { item in
+            TextItemView(item: item, textVM: textVM)
+        }
+    }
+}
+```
+
+### Preview/TextItemView.swift
+```swift
+import SwiftUI
+
+struct TextItemView: View {
+    let item: TextItem
+    @ObservedObject var textVM: TextOverlayViewModel
+    
+    var body: some View {
+        Text(item.text)
+            .font(.system(size: item.fontSize))
+            .foregroundColor(item.color)
+            .position(item.position)
+            .onTapGesture {
+                textVM.setActive(id: item.id, editing: true)
+            }
+            .draggable(item.id.uuidString) {
+                Text(item.text)
+                    .font(.system(size: item.fontSize))
+                    .foregroundColor(item.color)
+            }
+            .onDrag {
+                NSItemProvider(object: item.id.uuidString as NSString)
+            }
+    }
+}
+```
+
+### Preview/CanvasLayer.swift
+```swift
+import SwiftUI
+
+struct CanvasLayer: View {
+    var body: some View {
+        Rectangle()
+            .fill(Color.clear)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+```
+
+### Preview/ZoomableView.swift
+```swift
+import SwiftUI
+
+struct ZoomableView<Content: View>: View {
+    let content: Content
+    @State private var scale: CGFloat = 1.0
+    @State private var lastScale: CGFloat = 1.0
+    
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+    
+    var body: some View {
+        content
+            .scaleEffect(scale)
+            .gesture(
+                MagnificationGesture()
+                    .onChanged { value in
+                        let delta = value / lastScale
+                        scale = delta
+                        lastScale = value
+                    }
+                    .onEnded { _ in
+                        lastScale = 1.0
+                    }
+            )
+    }
+}
+```
+
+### Tools/ToolsPanel.swift
+```swift
+import SwiftUI
+import PencilKit
+
+struct ToolsPanel: View {
+    @ObservedObject var vm: EditorViewModel
+    @Binding var drawing: PKDrawing
+    @Binding var tool: PKInkingTool
+    @Binding var isErasing: Bool
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            Button(action: vm.startDraw) {
+                Image(systemName: "pencil.tip")
+                    .foregroundColor(vm.markup == .draw ? .accentColor : .primary)
+            }
+            
+            Button(action: vm.startText) {
+                Image(systemName: "textformat")
+                    .foregroundColor(vm.markup == .text ? .accentColor : .primary)
+            }
+            
+            Spacer()
+            
+            if vm.markup == .draw {
+                DrawToolsPanel(drawing: $drawing, tool: $tool, isErasing: $isErasing)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(Color(.systemBackground))
+    }
+}
+```
+
+### Tools/DrawToolsPanel.swift
+```swift
+import SwiftUI
+import PencilKit
+
+struct DrawToolsPanel: View {
+    @Binding var drawing: PKDrawing
+    @Binding var tool: PKInkingTool
+    @Binding var isErasing: Bool
+    
+    @State private var lineWidth: CGFloat = 5
+    @State private var selectedColor: Color = .black
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            ColorPicker("Цвет", selection: $selectedColor)
+                .labelsHidden()
+                .onChange(of: selectedColor) { _, newColor in
+                    tool = PKInkingTool(.pen, color: newColor.uiColor, width: lineWidth)
+                }
+            
+            Slider(value: $lineWidth, in: 1...20)
+                .frame(width: 80)
+                .onChange(of: lineWidth) { _, newWidth in
+                    tool = PKInkingTool(.pen, color: selectedColor.uiColor, width: newWidth)
+                }
+            
+            Button(action: { isErasing.toggle() }) {
+                Image(systemName: isErasing ? "eraser.fill" : "eraser")
+                    .foregroundColor(isErasing ? .accentColor : .primary)
+            }
+            
+            Button(action: { drawing = PKDrawing() }) {
+                Image(systemName: "trash")
+                    .foregroundColor(.red)
+            }
+        }
+    }
+}
+```
+
+### Tools/FilterToolsPanel.swift
+```swift
+import SwiftUI
+
+struct FilterToolsPanel: View {
+    let filters: [Filter]
+    @Binding var selectedFilter: Filter?
+    let cache: FilterPreviewCache
+    
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 12) {
+                ForEach(filters) { filter in
+                    FilterPreviewImage(
+                        filter: filter,
+                        isSelected: selectedFilter?.id == filter.id,
+                        cache: cache
+                    ) {
+                        selectedFilter = filter.isNone ? nil : filter
+                    }
+                }
+            }
+            .padding(.horizontal, 16)
+        }
+        .frame(height: 80)
+        .background(Color(.systemBackground))
+    }
+}
+```
+
+### Tools/FilterPreviewCache.swift
+```swift
+import SwiftUI
+
+class FilterPreviewCache: ObservableObject {
+    private var cache: [String: UIImage] = [:]
+    
+    func preparePreviews(for image: UIImage?, filters: [Filter]) {
+        guard let image = image else { return }
+        
+        for filter in filters {
+            if filter.isNone { continue }
+            
+            Task.detached(priority: .userInitiated) {
+                if let preview = self.createPreview(for: image, filter: filter) {
+                    await MainActor.run {
+                        self.cache[filter.id.uuidString] = preview
+                    }
+                }
+            }
+        }
+    }
+    
+    func getPreview(for filter: Filter) -> UIImage? {
+        return cache[filter.id.uuidString]
+    }
+    
+    private func createPreview(for image: UIImage, filter: Filter) -> UIImage? {
+        // Создание превью с фильтром
+        return image
+    }
+}
+```
+
+### Tools/TextToolsToolbar.swift
+```swift
+import SwiftUI
+
+struct TextToolsToolbar: ToolbarContent {
+    @ObservedObject var vm: TextOverlayViewModel
+    let onDone: () -> Void
+    
+    var body: some ToolbarContent {
+        ToolbarItem(placement: .keyboard) {
+            HStack {
+                ColorPicker("Цвет", selection: $vm.currentColor)
+                    .labelsHidden()
+                
+                Stepper("Размер: \(Int(vm.currentSize))", value: $vm.currentSize, in: 12...72)
+                
+                Button("Готово", action: onDone)
+                    .foregroundColor(.accentColor)
+            }
+        }
+    }
+}
+```
+
+### Tools/TopToolControls.swift
+```swift
+import SwiftUI
+
+struct TopToolControls: View {
+    @ObservedObject var vm: EditorViewModel
+    
+    var body: some View {
+        HStack {
+            Button(action: { vm.rotationCount = (vm.rotationCount + 1) % 4 }) {
+                Image(systemName: "rotate.right")
+                    .foregroundColor(.primary)
+            }
+            
+            Button(action: { vm.isFlippedHorizontally.toggle() }) {
+                Image(systemName: "flip.horizontal")
+                    .foregroundColor(vm.isFlippedHorizontally ? .accentColor : .primary)
+            }
+            
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(Color(.systemBackground))
+    }
+}
+```
+
+### Tools/EditorTopBar.swift
+```swift
+import SwiftUI
+
+struct EditorTopBar: View {
+    @ObservedObject var vm: EditorViewModel
+    
+    var body: some View {
+        HStack {
+            TopToolControls(vm: vm)
+            Spacer()
+        }
+        .background(Color(.systemBackground))
+    }
+}
+```
+
+### FilterTools/FilterPreviewImage.swift
+```swift
+import SwiftUI
+
+struct FilterPreviewImage: View {
+    let filter: Filter
+    let isSelected: Bool
+    let cache: FilterPreviewCache
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            VStack(spacing: 4) {
+                if let preview = cache.getPreview(for: filter) {
+                    Image(uiImage: preview)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 60, height: 60)
+                        .clipped()
+                        .cornerRadius(8)
+                } else {
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 60, height: 60)
+                        .cornerRadius(8)
+                }
+                
+                Text(filter.name)
+                    .font(.caption)
+                    .foregroundColor(isSelected ? .accentColor : .primary)
+            }
+        }
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(isSelected ? Color.accentColor : Color.clear, lineWidth: 2)
+        )
+    }
+}
+```
+
+### Tab/ModeTabBar.swift
+```swift
+import SwiftUI
+
+struct ModeTabBar: View {
+    @Binding var currentMode: EditMode
+    
+    var body: some View {
+        HStack(spacing: 24) {
+            ModeButton(current: $currentMode, target: .draw, systemName: "pencil")
+            ModeButton(current: $currentMode, target: .text, systemName: "textformat")
+        }
+        .padding(.top, 6)
+    }
+}
+```
+
+### Tab/ModeButton.swift
+```swift
+import SwiftUI
+
+struct ModeButton: View {
+    @Binding var current: EditMode
+    let target: EditMode
+    let systemName: String
+    
+    var body: some View {
+        Button(action: { current = target }) {
+            Image(systemName: systemName)
+                .font(.title2)
+                .foregroundColor(current == target ? .accentColor : .primary)
+                .frame(width: 44, height: 44)
+                .background(
+                    Circle()
+                        .fill(current == target ? Color.accentColor.opacity(0.2) : Color.clear)
+                )
+        }
+    }
+}
+```
+
+### KeyboardAccessory/KeyboardAccessory.swift
+```swift
+import SwiftUI
+
+struct KeyboardAccessory: View {
+    var body: some View {
+        HStack {
+            Spacer()
+            Button("Готово") {
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(Color(.systemBackground))
+    }
+}
+```
+
+### KeyboardAccessory/AccessoryHostingController.swift
+```swift
+import SwiftUI
+import UIKit
+
+class AccessoryHostingController: UIHostingController<KeyboardAccessory> {
+    override var inputAccessoryView: UIView? {
+        let accessory = KeyboardAccessory()
+        return UIHostingController(rootView: accessory).view
+    }
+    
+    override var canBecomeFirstResponder: Bool {
+        return true
+    }
+}
+```
+
+---
+
+## Исходный код Features/Editor/Models
+
+### EditorMode.swift
+```swift
+import Foundation
+
+enum EditMode: CaseIterable, Identifiable {
+    case none
+    case draw
+    case text
+
+    var id: Self { self }
+
+    var iconName: String {
+        switch self {
+        case .none:
+            return ""
+        case .draw:
+            return "pencil.tip"
+        case .text:
+            return "textformat"
+        }
     }
 }
 ```
@@ -1672,12 +2260,6 @@ final class EditorViewModel: ObservableObject {
             img = try transformService.flipHorizontal(data: img)
         }
         
-
-        
-
-        
-
-
         return img
     }
 
@@ -1759,11 +2341,11 @@ final class TextOverlayViewModel: ObservableObject {
         let p = CGPoint(x: canvas.width / 2, y: y)
         
         let item = TextItem(text: "Текст",
-                            fontName: "System",
-                            fontSize: currentSize,
-                            color: currentColor,
-                            position: p,
-                            isEditing: true
+                           fontName: "System",
+                           fontSize: currentSize,
+                           color: currentColor,
+                           position: p,
+                           isEditing: true
         )
         items.append(item)
         activeID = item.id
@@ -1850,6 +2432,179 @@ extension TextOverlayViewModel {
     enum Edit {
         case size(CGFloat)
         case color(Color)
+    }
+}
+```
+
+---
+
+## Исходный код Navigation
+
+### RootView.swift
+```swift
+// Navigation/RootView.swift
+
+import SwiftUI
+
+struct RootView: View {
+    @EnvironmentObject private var session: SessionStore
+    let container:             AppDependencyContainer
+    let onLogout:              () -> Void
+
+    init(container: AppDependencyContainer, onLogout: @escaping () -> Void) {
+        self.container = container
+        self.onLogout  = onLogout
+    }
+
+    var body: some View {
+        NavigationStack {
+            if !session.didFinishChecking {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            else if session.isAuthenticated {
+                EditorView(
+                    vm:       container.makeEditorViewModel(),
+                    onShare:  { Task { try? await container.makeEditorViewModel().exportFinalImage() } },
+                    onLogout: onLogout
+                )
+            }
+            else {
+                AuthStackView(
+                    container: container,
+                    onLogin:   { /* после логина обновится session.isAuthenticated */ }
+                )
+            }
+        }
+        .environmentObject(session)
+    }
+}
+```
+
+---
+
+## Исходный код Core/Utilities
+
+### KeyboardObserver.swift
+```swift
+import SwiftUI
+import Combine
+
+class KeyboardObserver: ObservableObject {
+    @Published var height: CGFloat = 0
+    
+    private var cancellables = Set<AnyCancellable>()
+    
+    init() {
+        NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
+            .compactMap { notification in
+                notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect
+            }
+            .map { $0.height }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] height in
+                self?.height = height
+            }
+            .store(in: &cancellables)
+        
+        NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.height = 0
+            }
+            .store(in: &cancellables)
+    }
+}
+```
+
+### ShareSheet.swift
+```swift
+import SwiftUI
+
+struct ShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
+    
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: items, applicationActivities: nil)
+    }
+    
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+```
+
+### FilterWidthKey.swift
+```swift
+import SwiftUI
+
+struct FilterWidthKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+```
+
+### CanvasMetrics.swift
+```swift
+import SwiftUI
+
+struct CanvasMetrics {
+    let canvasSize: CGSize
+    let imageSize: CGSize?
+    let keyboardHeight: CGFloat
+    
+    var displaySize: CGSize {
+        guard let imageSize = imageSize else { return canvasSize }
+        
+        let imageAspect = imageSize.width / imageSize.height
+        let canvasAspect = canvasSize.width / canvasSize.height
+        
+        if imageAspect > canvasAspect {
+            let height = canvasSize.width / imageAspect
+            return CGSize(width: canvasSize.width, height: height)
+        } else {
+            let width = canvasSize.height * imageAspect
+            return CGSize(width: width, height: canvasSize.height)
+        }
+    }
+    
+    var verticalInset: CGFloat {
+        (canvasSize.height - displaySize.height) / 2
+    }
+}
+```
+
+### GeometryHelper.swift
+```swift
+import SwiftUI
+
+struct GeometryHelper {
+    static func centerPoint(in rect: CGRect) -> CGPoint {
+        CGPoint(x: rect.midX, y: rect.midY)
+    }
+    
+    static func distance(from point1: CGPoint, to point2: CGPoint) -> CGFloat {
+        sqrt(pow(point2.x - point1.x, 2) + pow(point2.y - point1.y, 2))
+    }
+}
+```
+
+### UIImage+SafeDecode.swift
+```swift
+import UIKit
+
+extension UIImage {
+    static func safeDecode(from data: Data) -> UIImage? {
+        guard let image = UIImage(data: data) else { return nil }
+        
+        if image.cgImage != nil {
+            return image
+        }
+        
+        // Попытка исправить проблему с ориентацией
+        guard let cgImage = image.cgImage else { return nil }
+        return UIImage(cgImage: cgImage, scale: image.scale, orientation: image.imageOrientation)
     }
 }
 ```

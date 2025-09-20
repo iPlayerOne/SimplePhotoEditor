@@ -31,7 +31,10 @@ final class ImageDecodeServiceImpl: ImageDecodeService {
     
     func downsample(_ data: Data, maxDimension: CGFloat, _ scale: CGFloat) -> UIImage? {
         let srcOpts: CFDictionary = [ kCGImageSourceShouldCache: false] as CFDictionary
-        let maxPixel = maxDimension * scale
+        let raw = maxDimension * scale
+        let maxPixel = Int(raw.rounded(.down))
+        let evenMaxPixel = maxPixel & ~1
+        
         print("🧩 [ImageDecode] downsample: bytes=\(data.count), maxDimension=\(maxDimension), scale=\(scale), maxPixel=\(maxPixel)")
         guard let src = CGImageSourceCreateWithData(data as CFData, srcOpts) else {
             print("❌ [ImageDecode] CGImageSourceCreateWithData failed")
@@ -41,7 +44,7 @@ final class ImageDecodeServiceImpl: ImageDecodeService {
             kCGImageSourceCreateThumbnailFromImageAlways: true,
             kCGImageSourceShouldCacheImmediately: true,
             kCGImageSourceCreateThumbnailWithTransform: true,
-            kCGImageSourceThumbnailMaxPixelSize: maxPixel
+            kCGImageSourceThumbnailMaxPixelSize: evenMaxPixel
         ] as CFDictionary
         guard let cg = CGImageSourceCreateThumbnailAtIndex(src, 0, downscaleOpts) else {
             print("❌ [ImageDecode] CGImageSourceCreateThumbnailAtIndex failed")

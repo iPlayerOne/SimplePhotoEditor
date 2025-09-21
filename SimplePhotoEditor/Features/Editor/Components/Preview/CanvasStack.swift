@@ -1,10 +1,11 @@
 import SwiftUI
 import PencilKit
+import Observation
 
 struct CanvasStack: View {
     let metrics: CanvasMetrics
     @ObservedObject var vm: EditorViewModel
-    @ObservedObject var textVM: TextOverlayViewModel
+    @Bindable var textVM: TextOverlayViewModel
 
     @Binding var drawing: PKDrawing
     @Binding var tool: PKInkingTool
@@ -34,15 +35,13 @@ struct CanvasStack: View {
             )
 
             if baseImage != nil {
-                    PencilCanvasView(drawing: $drawing, tool: tool, isErasing: isErasing)
+                PencilCanvasView(drawing: $drawing, tool: tool, isErasing: isErasing)
                     .frame(width: maxSize.width, height: maxSize.height)
-                        .allowsHitTesting(vm.mode == .draw)
+                    .allowsHitTesting(vm.mode == .draw)
 
-                    TextOverlayLayer(textVM: textVM, enabled: vm.mode == .text, focus: focus)
+                TextOverlayLayer(textVM: textVM, focus: focus)
                     .frame(width: maxSize.width, height: maxSize.height)
-   
             }
-                
 
             if vm.mode == .text && textVM.isPlacing && textVM.items.isEmpty {
                 Color.black.opacity(0.4).frame(width: maxSize.width, height: maxSize.height)
@@ -55,7 +54,6 @@ struct CanvasStack: View {
             }
         }
         .frame(width: maxSize.width, height: maxSize.height)
-//        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .contentShape(Rectangle())
         .canvasTransform(
             quarterTurns: vm.rotationCount,
@@ -64,6 +62,5 @@ struct CanvasStack: View {
         )
         .scaleEffect(scale * pinch)
         .simultaneousGesture(pinchGesture)
-        
     }
 }

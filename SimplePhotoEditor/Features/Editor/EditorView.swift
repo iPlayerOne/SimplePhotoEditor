@@ -1,6 +1,7 @@
 import SwiftUI
 import PhotosUI
 import PencilKit
+import Observation
 
 struct EditorView: View {
     @StateObject private var vm: EditorViewModel
@@ -18,22 +19,20 @@ struct EditorView: View {
     @State private var shareURL: URL?
     
     @FocusState private var focusedItemID: UUID?
+    @State private var imageSelectionToken = UUID()
     private let panelH: CGFloat = 96
     
     private let cameraAccess: CameraAccess
     let filters = FilterProviderImpl().allFilters()
-//    let onShare: () -> Void
     let onLogout: () -> Void
     
     init(
         vm: EditorViewModel,
         cameraAccess: CameraAccess,
-//        onShare: @escaping () -> Void,
         onLogout: @escaping () -> Void
     ) {
         _vm = StateObject(wrappedValue: vm)
         self.cameraAccess = cameraAccess
-//        self.onShare  = onShare
         self.onLogout = onLogout
     }
     
@@ -42,6 +41,7 @@ struct EditorView: View {
             VStack(spacing: 0) {
                 topTools
                 canvasArea
+                    .id(imageSelectionToken) // пересборка сабтри при смене изображения
             }
         }
         
@@ -93,11 +93,20 @@ struct EditorView: View {
             }
         }
         .onChange(of: vm.originalImage) { old, image in
+            // 1) Снять фокус и завершить редактирование ДО мутации модели — без UIKit-хаков
+            focusedItemID = nil
+            vm.textVM.finishEditing()
+            
+            // 2) Теперь можно безопасно менять состояние
             vm.selectedFilter = nil
             drawing = PKDrawing()
             vm.textVM.reset()
+            
+            // 3) Прогреть превью фильтров под новое изображение
             previewCache.preparePreviews(for: image, filters: filters)
             
+            // 4) Жесткая пересборка сабтри (сброс локального стейта дочерних вью)
+            imageSelectionToken = UUID()
         }
     }
 }

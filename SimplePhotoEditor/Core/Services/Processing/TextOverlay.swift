@@ -28,11 +28,13 @@ final class TextOverlayServiceImpl: TextOverlayService {
 
         // Рисуем каждый текст
         for item in items {
-            let attrs: [NSAttributedString.Key: Any] = [
-                .font: UIFont(name: item.fontName, size: item.fontSize)
-                        ?? UIFont.systemFont(ofSize: item.fontSize),
-                .foregroundColor: item.color
-            ]
+            let font = item.font.uiFont(size: CGFloat(item.fontSize))          // <- UIFont
+             let color = item.color.uiColor                                     // <- UIColor
+
+             let attrs: [NSAttributedString.Key: Any] = [
+                 .font: font,                                                  // требует UIFont
+                 .foregroundColor: color                                       // требует UIColor
+             ]
             let ns = NSString(string: item.text)
             let textSize = ns.size(withAttributes: attrs)
             let origin = CGPoint(

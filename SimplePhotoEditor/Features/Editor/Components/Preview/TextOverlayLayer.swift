@@ -1,19 +1,14 @@
 import SwiftUI
+import Observation
 
 struct TextOverlayLayer: View {
-    @ObservedObject var textVM: TextOverlayViewModel
-    let enabled: Bool
+    @Bindable var textVM: TextOverlayViewModel
     let focus: FocusState<UUID?>.Binding
-    
 
     var body: some View {
         ZStack {
-            ForEach($textVM.items, id: \.id) { $item in
-                TextItemView(
-                    item:    $item,
-                    vm:  textVM,
-                    focus: focus
-                )
+            ForEach(textVM.items) { item in
+                TextItemView(item: item, vm: textVM, focus: focus)
             }
         }
     }

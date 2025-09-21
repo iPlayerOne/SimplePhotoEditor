@@ -78,11 +78,11 @@ final class OverlayRenderServiceImpl: OverlayRenderService {
     private func drawTexts(_ items: [TextItem], in ctx: UIGraphicsImageRendererContext, mapping: CanvasMapping) {
         for item in items {
             let pt = mapping.canvasToImage(item.position)
-            let fontSize = item.fontSize * mapping.scaleToImage
+            let fontSize = CGFloat(item.fontSize) * mapping.scaleToImage
             let attrs: [NSAttributedString.Key: Any] = [
-                .font : UIFont(name: item.fontName, size: item.fontSize) ?? .systemFont(ofSize: fontSize),
+                .font : item.font.uiFont(size: fontSize),
                 .foregroundColor: item.color.uiColor
-        ]
+            ]
             let ns = item.text as NSString
             let ts = ns.size(withAttributes: attrs)
             let origin = CGPoint(x: pt.x - ts.width / 2, y: pt.y - ts.height / 2)
@@ -129,5 +129,3 @@ private struct CanvasMapping {
         )
     }
 }
-
-

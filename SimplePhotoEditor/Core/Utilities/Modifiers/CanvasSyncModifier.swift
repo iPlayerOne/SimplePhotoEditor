@@ -1,4 +1,5 @@
 import SwiftUI
+import Observation
 
 struct CanvasSync: ViewModifier {
     let geo: GeometryProxy
@@ -6,7 +7,7 @@ struct CanvasSync: ViewModifier {
     let bottomChromeHeight: CGFloat
 
     @ObservedObject var vm: EditorViewModel
-    @ObservedObject var textVM: TextOverlayViewModel
+    @Bindable var textVM: TextOverlayViewModel
     let baseImage: UIImage?
 
     func body(content: Content) -> some View {
@@ -48,3 +49,4 @@ struct CanvasSync: ViewModifier {
         return max(0, effectiveKB - localBottom)
     }
 }
+

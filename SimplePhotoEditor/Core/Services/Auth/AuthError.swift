@@ -9,53 +9,51 @@ enum AuthError: Error, Identifiable {
     case weakPassword
     case userDisabled
     case tooManyRequests
-    
+
     // MARK: Google
     case accountExistsWithDifferentCredential
     case credentialAlreadyInUse
     case invalidCredential
     case popupClosedByUser
     case operationNotAllowed
-    
+
     case networkError(underlying: Error)
     case unknown
-    
+
     var id: String { localizedDescription }
 
     var localizedDescription: String {
         switch self {
-                
         case .emailAlreadyInUse:
-            return "Этот email уже зарегистрирован."
+            return String(localized: "auth.error.email_in_use")
         case .invalidEmailFormat:
-            return "Неверный формат email."
+            return String(localized: "auth.error.invalid_email")
         case .userNotFound:
-            return "Пользователь не найден."
+            return String(localized: "auth.error.user_not_found")
         case .wrongPassword:
-            return "Неверный пароль."
+            return String(localized: "auth.error.wrong_password")
         case .weakPassword:
-            return "Пароль слишком простой (минимум 6 символов)."
+            return String(localized: "auth.error.weak_password")
         case .userDisabled:
-            return "Аккаунт отключён. Обратитесь в поддержку."
+            return String(localized: "auth.error.user_disabled")
         case .tooManyRequests:
-            return "Слишком много попыток. Попробуйте позже."
-                
-        case .accountExistsWithDifferentCredential:
-            return "Этот email привязан к другому провайдеру."
-        case .credentialAlreadyInUse:
-            return "Учётные данные уже используются другим аккаунтом."
-        case .invalidCredential:
-            return "Неверные или устаревшие учётные данные."
-        case .popupClosedByUser:
-            return "Вход отменён пользователем."
-        case .operationNotAllowed:
-            return "Вход через Google отключён администратором."
+            return String(localized: "auth.error.too_many_requests")
 
+        case .accountExistsWithDifferentCredential:
+            return String(localized: "auth.error.account_exists_with_different_credential")
+        case .credentialAlreadyInUse:
+            return String(localized: "auth.error.credential_already_in_use")
+        case .invalidCredential:
+            return String(localized: "auth.error.invalid_credential")
+        case .popupClosedByUser:
+            return String(localized: "auth.error.popup_closed_by_user")
+        case .operationNotAllowed:
+            return String(localized: "auth.error.operation_not_allowed")
 
         case .networkError:
-            return "Проблемы с сетью. Проверьте подключение."
+            return String(localized: "auth.error.network")
         case .unknown:
-            return "Произошла неизвестная ошибка. Попробуйте снова."
+            return String(localized: "auth.error.unknown")
         }
     }
 }

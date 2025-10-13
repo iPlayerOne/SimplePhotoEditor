@@ -35,16 +35,15 @@ class RegistrationViewModel: ObservableObject {
         isLoading = true
         
         do {
-            _ = try await authService.register(email: email, password: password)
-            // если успешно — покажем алерт
+            let cleanEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+            _ = try await authService.register(email: cleanEmail, password: password)
+            // sendEmailVerification вызывается внутри FirebaseAuthService.register
             didRegister = true
         }
         catch let err as AuthError {
-            // перехватываем конкретную ошибку «email уже занят»
             self.error = err
         }
         catch {
-            // всё остальное как сетевые сбои
             self.error = .networkError(underlying: error)
         }
         

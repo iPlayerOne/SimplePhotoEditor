@@ -15,14 +15,17 @@ struct RootView: View {
     var body: some View {
         NavigationStack {
             if !session.didFinishChecking {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                VStack {
+                    ProgressView()
+                    Text(String(localized: "common.loading"))
+                        .padding(.top, 8)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             else if session.isAuthenticated {
                 EditorView(
                     vm:       container.makeEditorViewModel(),
                     cameraAccess: container.cameraAccessService,
-//                    onShare:  { Task { try? await container.makeEditorViewModel().exportFinalImage() } },
                     onLogout: onLogout
                 )
             }

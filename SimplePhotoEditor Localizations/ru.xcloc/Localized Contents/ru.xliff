@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
+  <file original="InfoPlist.xcstrings" source-language="ru" target-language="ru" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="26.0.1" build-num="17A400"/>
+    </header>
+    <body>
+      <trans-unit id="CFBundleName" xml:space="preserve">
+        <source>SimplePhotoEditor</source>
+        <target state="new">SimplePhotoEditor</target>
+        <note>Bundle name</note>
+      </trans-unit>
+      <trans-unit id="NSCameraUsageDescription" xml:space="preserve">
+        <source>Нужен доступ к камере, чтобы делать снимки</source>
+        <target state="new">Нужен доступ к камере, чтобы делать снимки</target>
+        <note>Privacy - Camera Usage Description</note>
+      </trans-unit>
+      <trans-unit id="NSPhotoLibraryAddUsageDescription" xml:space="preserve">
+        <source>Приложение сохраняет отредактированные фото в вашу фотоплёнку.</source>
+        <target state="new">Приложение сохраняет отредактированные фото в вашу фотоплёнку.</target>
+        <note>Privacy - Photo Library Additions Usage Description</note>
+      </trans-unit>
+      <trans-unit id="NSPhotoLibraryUsageDescription" xml:space="preserve">
+        <source>Приложение использует фотогалерею, чтобы вы могли выбрать изображение для редактирования.</source>
+        <target state="new">Приложение использует фотогалерею, чтобы вы могли выбрать изображение для редактирования.</target>
+        <note>Privacy - Photo Library Usage Description</note>
+      </trans-unit>
+    </body>
+  </file>
+  <file original="Localizable.xcstrings" source-language="ru" target-language="ru" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="26.0.1" build-num="17A400"/>
+    </header>
+    <body>
+      <trans-unit id="" xml:space="preserve">
+        <source/>
+        <target state="new"/>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld pt" xml:space="preserve">
+        <source>%lld pt</source>
+        <target state="new">%lld pt</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Aa" xml:space="preserve">
+        <source>Aa</source>
+        <target state="new">Aa</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Font" xml:space="preserve">
+        <source>Font</source>
+        <target state="new">Font</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Forgot Password?" xml:space="preserve">
+        <source>Forgot Password?</source>
+        <target state="new">Forgot Password?</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="OK" xml:space="preserve">
+        <source>OK</source>
+        <target state="new">OK</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Sign In" xml:space="preserve">
+        <source>Sign In</source>
+        <target state="new">Sign In</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Sign Up" xml:space="preserve">
+        <source>Sign Up</source>
+        <target state="new">Sign Up</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Size" xml:space="preserve">
+        <source>Size</source>
+        <target state="new">Size</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Welcome Back" xml:space="preserve">
+        <source>Welcome Back</source>
+        <target state="new">Welcome Back</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="welcome_title" xml:space="preserve">
+        <source>welcome_title</source>
+        <target state="new">welcome_title</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Восстановление пароля" xml:space="preserve">
+        <source>Восстановление пароля</source>
+        <target state="new">Восстановление пароля</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Галерея" xml:space="preserve">
+        <source>Галерея</source>
+        <target state="new">Галерея</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Готово" xml:space="preserve">
+        <source>Готово</source>
+        <target state="new">Готово</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Забыли пароль?" xml:space="preserve">
+        <source>Забыли пароль?</source>
+        <target state="new">Забыли пароль?</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Источник изображения" xml:space="preserve">
+        <source>Источник изображения</source>
+        <target state="new">Источник изображения</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Камера" xml:space="preserve">
+        <source>Камера</source>
+        <target state="new">Камера</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Нажмите, чтобы добавить текст" xml:space="preserve">
+        <source>Нажмите, чтобы добавить текст</source>
+        <target state="new">Нажмите, чтобы добавить текст</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Настройки" xml:space="preserve">
+        <source>Настройки</source>
+        <target state="new">Настройки</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Недоступно" xml:space="preserve">
+        <source>Недоступно</source>
+        <target state="new">Недоступно</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Нет доступа к камере" xml:space="preserve">
+        <source>Нет доступа к камере</source>
+        <target state="new">Нет доступа к камере</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Отмена" xml:space="preserve">
+        <source>Отмена</source>
+        <target state="new">Отмена</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Письмо отправлено" xml:space="preserve">
+        <source>Письмо отправлено</source>
+        <target state="new">Письмо отправлено</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Пожалуйста, подтвердите свою почту в письме." xml:space="preserve">
+        <source>Пожалуйста, подтвердите свою почту в письме.</source>
+        <target state="new">Пожалуйста, подтвердите свою почту в письме.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Проверьте вашу почту для дальнейших инструкций." xml:space="preserve">
+        <source>Проверьте вашу почту для дальнейших инструкций.</source>
+        <target state="new">Проверьте вашу почту для дальнейших инструкций.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Разрешите доступ к камере в настройках устройства." xml:space="preserve">
+        <source>Разрешите доступ к камере в настройках устройства.</source>
+        <target state="new">Разрешите доступ к камере в настройках устройства.</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Регистрация" xml:space="preserve">
+        <source>Регистрация</source>
+        <target state="new">Регистрация</target>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Создать аккаунт" xml:space="preserve">
+        <source>Создать аккаунт</source>
+        <target state="new">Создать аккаунт</target>
+        <note/>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

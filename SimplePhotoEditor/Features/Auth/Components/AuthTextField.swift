@@ -6,17 +6,36 @@ struct AuthTextField: View {
     var keyboard: UIKeyboardType = .default
     var isSecure: Bool = false
     var textContentType: UITextContentType? = nil
+    var isFocused: FocusState<Bool>.Binding? = nil
 
     var body: some View {
         Group {
             if isSecure {
-                SecureField(placeholder, text: $text)
-                    .textContentType(textContentType)
+                if let isFocused {
+                    SecureField(placeholder, text: $text)
+                        .textContentType(textContentType)
+                        .autocorrectionDisabled(true)
+                        .focused(isFocused)
+                } else {
+                    SecureField(placeholder, text: $text)
+                        .textContentType(textContentType)
+                        .autocorrectionDisabled(true)
+                }
             } else {
-                TextField(placeholder, text: $text)
-                    .keyboardType(keyboard)
-                    .autocapitalization(.none)
-                    .textContentType(textContentType)
+                if let isFocused {
+                    TextField(placeholder, text: $text)
+                        .keyboardType(keyboard)
+                        .autocapitalization(.none)
+                        .textContentType(textContentType)
+                        .autocorrectionDisabled(true)
+                        .focused(isFocused)
+                } else {
+                    TextField(placeholder, text: $text)
+                        .keyboardType(keyboard)
+                        .autocapitalization(.none)
+                        .textContentType(textContentType)
+                        .autocorrectionDisabled(true)
+                }
             }
         }
         .authFieldStyle()

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
+  <file original="InfoPlist.xcstrings" source-language="ru" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="26.0.1" build-num="17A400"/>
+    </header>
+    <body>
+      <trans-unit id="CFBundleName" xml:space="preserve">
+        <source>SimplePhotoEditor</source>
+        <note>Bundle name</note>
+      </trans-unit>
+      <trans-unit id="NSCameraUsageDescription" xml:space="preserve">
+        <source>Нужен доступ к камере, чтобы делать снимки</source>
+        <note>Privacy - Camera Usage Description</note>
+      </trans-unit>
+      <trans-unit id="NSPhotoLibraryAddUsageDescription" xml:space="preserve">
+        <source>Приложение сохраняет отредактированные фото в вашу фотоплёнку.</source>
+        <note>Privacy - Photo Library Additions Usage Description</note>
+      </trans-unit>
+      <trans-unit id="NSPhotoLibraryUsageDescription" xml:space="preserve">
+        <source>Приложение использует фотогалерею, чтобы вы могли выбрать изображение для редактирования.</source>
+        <note>Privacy - Photo Library Usage Description</note>
+      </trans-unit>
+    </body>
+  </file>
+  <file original="Localizable.xcstrings" source-language="ru" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="26.0.1" build-num="17A400"/>
+    </header>
+    <body>
+      <trans-unit id="" xml:space="preserve">
+        <source/>
+        <note/>
+      </trans-unit>
+      <trans-unit id="%lld pt" xml:space="preserve">
+        <source>%lld pt</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Aa" xml:space="preserve">
+        <source>Aa</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Font" xml:space="preserve">
+        <source>Font</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Forgot Password?" xml:space="preserve">
+        <source>Forgot Password?</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="OK" xml:space="preserve">
+        <source>OK</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Sign In" xml:space="preserve">
+        <source>Sign In</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Sign Up" xml:space="preserve">
+        <source>Sign Up</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Size" xml:space="preserve">
+        <source>Size</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Welcome Back" xml:space="preserve">
+        <source>Welcome Back</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="welcome_title" xml:space="preserve">
+        <source>welcome_title</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Восстановление пароля" xml:space="preserve">
+        <source>Восстановление пароля</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Галерея" xml:space="preserve">
+        <source>Галерея</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Готово" xml:space="preserve">
+        <source>Готово</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Забыли пароль?" xml:space="preserve">
+        <source>Забыли пароль?</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Источник изображения" xml:space="preserve">
+        <source>Источник изображения</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Камера" xml:space="preserve">
+        <source>Камера</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Нажмите, чтобы добавить текст" xml:space="preserve">
+        <source>Нажмите, чтобы добавить текст</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Настройки" xml:space="preserve">
+        <source>Настройки</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Недоступно" xml:space="preserve">
+        <source>Недоступно</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Нет доступа к камере" xml:space="preserve">
+        <source>Нет доступа к камере</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Отмена" xml:space="preserve">
+        <source>Отмена</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Письмо отправлено" xml:space="preserve">
+        <source>Письмо отправлено</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Пожалуйста, подтвердите свою почту в письме." xml:space="preserve">
+        <source>Пожалуйста, подтвердите свою почту в письме.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Проверьте вашу почту для дальнейших инструкций." xml:space="preserve">
+        <source>Проверьте вашу почту для дальнейших инструкций.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Разрешите доступ к камере в настройках устройства." xml:space="preserve">
+        <source>Разрешите доступ к камере в настройках устройства.</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Регистрация" xml:space="preserve">
+        <source>Регистрация</source>
+        <note/>
+      </trans-unit>
+      <trans-unit id="Создать аккаунт" xml:space="preserve">
+        <source>Создать аккаунт</source>
+        <note/>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

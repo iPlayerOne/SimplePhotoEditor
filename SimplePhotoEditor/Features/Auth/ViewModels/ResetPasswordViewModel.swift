@@ -17,17 +17,24 @@ class ResetPasswordViewModel: ObservableObject {
         self.authService = authService
 
         $email
-            .map { $0.contains("@") && $0.contains(".") }
+            .map { EmailValidator.isValid($0) }
             .assign(to: &$canReset)
     }
 
     func resetPassword() async {
-        guard canReset else { return }
+        let cleanEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Валидация на отправку: показываем алерт и не идём в сеть
+        guard EmailValidator.isValid(cleanEmail) else {
+            self.error = .invalidEmailFormat
+            return
+        }
+
         isLoading = true
         defer { isLoading = false }
 
         do {
-            try await authService.resetPassword(email: email)
+            try await authService.resetPassword(email: cleanEmail)
             didSend = true
         } catch let err as AuthError {
             self.error = err

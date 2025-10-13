@@ -13,17 +13,29 @@ struct LoginView: View {
     // MARK: – Google Sign-In Coordinator
     let googleCoordinator: GoogleSignInCoordinator
 
+    // MARK: – Сброс пароля (sheet)
+    @State private var showReset = false
+    private let makeResetVM: () -> ResetPasswordViewModel
+
     /// Колбэк, вызываемый после успешного логина (чтобы поднять флаг в RootView)
     let onSuccess: () -> Void
+
+    // Focus + visited для подсказок «после ухода фокуса»
+    @FocusState private var emailFocused: Bool
+    @FocusState private var passwordFocused: Bool
+    @State private var emailVisited = false
+    @State private var passwordVisited = false
 
     init(
         vm: LoginViewModel,
         googleCoordinator: GoogleSignInCoordinator,
-        onSuccess: @escaping () -> Void
+        onSuccess: @escaping () -> Void,
+        resetVMFactory: @escaping () -> ResetPasswordViewModel
     ) {
         _vm = StateObject(wrappedValue: vm)
         self.googleCoordinator = googleCoordinator
         self.onSuccess = onSuccess
+        self.makeResetVM = resetVMFactory
     }
 
     var body: some View {
@@ -31,17 +43,39 @@ struct LoginView: View {
             Text("Welcome Back")
                 .font(.largeTitle)
                 .fontWeight(.bold)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
             VStack(spacing: 16) {
+                // Email
                 AuthTextField(
                     placeholder: "Email",
                     text: $vm.email,
-                    keyboard: .emailAddress
+                    keyboard: .emailAddress,
+                    textContentType: .emailAddress,
+                    isFocused: $emailFocused
                 )
+                .onChange(of: emailFocused) {
+                    if !emailFocused { emailVisited = true }
+                }
+                .validationMessage(
+                    "Enter a valid email.",
+                    visible: emailVisited && !emailFocused && !vm.email.isEmpty && !EmailValidator.isValid(vm.email)
+                )
+
+                // Password
                 AuthTextField(
                     placeholder: "Password (min 6)",
                     text: $vm.password,
-                    isSecure: true
+                    isSecure: true,
+                    textContentType: .password,
+                    isFocused: $passwordFocused
+                )
+                .onChange(of: passwordFocused) {
+                    if !passwordFocused { passwordVisited = true }
+                }
+                .validationMessage(
+                    "Password is too short (min 6).",
+                    visible: passwordVisited && !passwordFocused && !vm.password.isEmpty && vm.password.count < 6
                 )
             }
 
@@ -92,13 +126,16 @@ struct LoginView: View {
                 Button("Sign Up") {
                     authRouter.path.append(.signUp)
                 }
+                .buttonStyle(.authSecondary)
+
                 Spacer()
+
                 Button("Forgot Password?") {
-                    authRouter.path.append(.resetPassword)
+                    showReset = true
                 }
+                .buttonStyle(.authSecondary)
             }
             .font(.footnote)
-            .foregroundColor(.secondary)
 
             Spacer()
         }
@@ -106,5 +143,8 @@ struct LoginView: View {
         .alertLocalizedError($vm.error, title: "Login Failed")
         .navigationTitle("Sign In")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showReset) {
+            ResetPasswordView(vm: makeResetVM())
+        }
     }
 }

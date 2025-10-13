@@ -10,14 +10,14 @@ struct AlertModifier<E>: ViewModifier where E: LocalizedError & Identifiable {
                 Alert(
                     title: Text(title),
                     message: Text(err.errorDescription ?? ""),
-                    dismissButton: .cancel(Text("OK"))
+                    dismissButton: .cancel(Text(String(localized: "common.ok")))
                 )
             }
     }
 }
 
 extension View {
-    func alertLocalizedError<E>(_ error: Binding<E?>, title: String = "Error") -> some View where E: LocalizedError & Identifiable {
+    func alertLocalizedError<E>(_ error: Binding<E?>, title: String = String(localized: "common.error")) -> some View where E: LocalizedError & Identifiable {
         self.modifier(AlertModifier(title: title, error: error))
     }
 }

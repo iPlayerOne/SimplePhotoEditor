@@ -43,7 +43,6 @@ final class FirebaseAuthService: AuthService {
         }
     }
 
-
     func signIn(email: String, password: String) async throws -> User {
         do {
             let result = try await Auth.auth().signIn(
@@ -101,7 +100,27 @@ final class FirebaseAuthService: AuthService {
     }
 
     func resetPassword(email: String) async throws {
-        try await Auth.auth().sendPasswordReset(withEmail: email)
+        do {
+            try await Auth.auth().sendPasswordReset(withEmail: email)
+        } catch {
+            let ns = error as NSError
+            if let code = AuthErrorCode(rawValue: ns.code) {
+                switch code {
+                case .invalidEmail:
+                    throw AuthError.invalidEmailFormat
+                case .userNotFound:
+                    // Не раскрываем существование аккаунта — ведём себя как успех
+                    return
+                case .tooManyRequests:
+                    throw AuthError.tooManyRequests
+                case .networkError:
+                    throw AuthError.networkError(underlying: ns)
+                default:
+                    throw AuthError.networkError(underlying: ns)
+                }
+            }
+            throw AuthError.networkError(underlying: ns)
+        }
     }
 
     func signOut() throws {

@@ -22,7 +22,9 @@ final class LoginViewModel: ObservableObject {
         self.googleCoordinator  = googleCoordinator
 
         Publishers.CombineLatest($email, $password)
-            .map { email, pass in email.contains("@") && pass.count >= 6 }
+            .map { email, pass in
+                EmailValidator.isValid(email) && pass.count >= 6
+            }
             .assign(to: &$canSignIn)
     }
 
@@ -31,8 +33,8 @@ final class LoginViewModel: ObservableObject {
         isLoading = true; defer { isLoading = false }
 
         do {
-            _ = try await authService.signIn(email: email, password: password)
-            
+            let cleanEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+            _ = try await authService.signIn(email: cleanEmail, password: password)
         } catch let err as AuthError {
             self.error = err
         } catch {

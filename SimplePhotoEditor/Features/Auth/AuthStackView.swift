@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct AuthStackView: View {
-    @EnvironmentObject private var appState: AppState
     @StateObject private var authRouter = AuthRouter()
     private let container: AppDependencyContainer
     private let onLogin: () -> Void
@@ -19,7 +18,8 @@ struct AuthStackView: View {
             LoginView(
                 vm: container.makeLoginViewModel(),
                 googleCoordinator: container.googleCoordinator,
-                onSuccess: onLogin
+                onSuccess: onLogin,
+                resetVMFactory: { container.makeResetPasswordViewModel() }
             )
             .environmentObject(authRouter)
             .navigationDestination(for: AuthRoute.self) { route in
@@ -31,6 +31,7 @@ struct AuthStackView: View {
                     .environmentObject(authRouter)
 
                 case .resetPassword:
+                    // Больше не используется, но оставим для совместимости.
                     ResetPasswordView(
                         vm: container.makeResetPasswordViewModel()
                     )

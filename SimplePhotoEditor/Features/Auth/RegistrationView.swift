@@ -4,35 +4,70 @@ struct RegistrationView: View {
     @StateObject var vm: RegistrationViewModel
     @EnvironmentObject var router: AuthRouter
 
+    @FocusState private var emailFocused: Bool
+    @FocusState private var passwordFocused: Bool
+    @FocusState private var repeatFocused: Bool
+
+    @State private var emailVisited = false
+    @State private var passwordVisited = false
+    @State private var repeatVisited = false
+
     var body: some View {
         VStack(spacing: 32) {
-            Text("Создать аккаунт")
+            Text(String(localized: "auth.registration.header"))
                 .font(.largeTitle.weight(.bold))
                 .frame(maxWidth: .infinity, alignment: .leading)
 
+            // Email
             AuthTextField(
-                placeholder: "Электронная почта",
+                placeholder: String(localized: "auth.email.placeholder"),
                 text: $vm.email,
                 keyboard: .emailAddress,
-                textContentType: .emailAddress
+                textContentType: .emailAddress,
+                isFocused: $emailFocused
+            )
+            .onChange(of: emailFocused) {
+                if !emailFocused { emailVisited = true }
+            }
+            .validationMessage(
+                String(localized: "auth.validation.email.invalid"),
+                visible: emailVisited && !emailFocused && !vm.email.isEmpty && !EmailValidator.isValid(vm.email)
             )
 
+            // Пароль
             AuthTextField(
-                placeholder: "Пароль (мин. 6 символов)",
+                placeholder: String(localized: "auth.password.placeholder"),
                 text: $vm.password,
                 isSecure: true,
-                textContentType: .newPassword
+                textContentType: .newPassword,
+                isFocused: $passwordFocused
+            )
+            .onChange(of: passwordFocused) {
+                if !passwordFocused { passwordVisited = true }
+            }
+            .validationMessage(
+                String(localized: "auth.validation.password.short"),
+                visible: passwordVisited && !passwordFocused && !vm.password.isEmpty && vm.password.count < 6
             )
 
+            // Повтор пароля
             AuthTextField(
-                placeholder: "Повторите пароль",
+                placeholder: String(localized: "auth.password.repeat.placeholder"),
                 text: $vm.repeatPassword,
                 isSecure: true,
-                textContentType: .newPassword
+                textContentType: .newPassword,
+                isFocused: $repeatFocused
+            )
+            .onChange(of: repeatFocused) {
+                if !repeatFocused { repeatVisited = true }
+            }
+            .validationMessage(
+                String(localized: "auth.validation.password.mismatch"),
+                visible: repeatVisited && !repeatFocused && !vm.repeatPassword.isEmpty && vm.password != vm.repeatPassword
             )
 
             PrimaryActionButton(
-                title: "Зарегистрироваться",
+                title: String(localized: "auth.registration.button"),
                 enabled: vm.canRegister
             ) {
                 Task { await vm.register() }
@@ -46,18 +81,16 @@ struct RegistrationView: View {
             Spacer()
         }
         .padding(24)
-        .navigationTitle("Регистрация")
+        .navigationTitle(String(localized: "auth.registration.title"))
         .navigationBarTitleDisplayMode(.inline)
-        // Показываем ошибку из vm.error
-        .alertLocalizedError($vm.error, title: "Ошибка регистрации")
-        // После успешной регистрации — уведомление и возврат назад
-        .alert("Письмо отправлено",
+        .alertLocalizedError($vm.error, title: String(localized: "auth.registration.error.title"))
+        .alert(String(localized: "auth.registration.verification.title"),
                isPresented: $vm.didRegister) {
-            Button("OK") {
+            Button(String(localized: "common.ok")) {
                 router.path.removeLast()
             }
         } message: {
-            Text("Пожалуйста, подтвердите свою почту в письме.")
+            Text(String(localized: "auth.registration.verification.message"))
         }
     }
 }

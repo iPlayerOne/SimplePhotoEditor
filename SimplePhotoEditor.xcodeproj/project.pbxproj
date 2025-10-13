@@ -11,10 +11,12 @@
 		308C67E02DEF4AC400B79484 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 308C67DF2DEF4AC400B79484 /* FirebaseCore */; };
 		308C67E32DEF4AD400B79484 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 308C67E22DEF4AD400B79484 /* GoogleSignIn */; };
 		308C67E52DEF4AD400B79484 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 308C67E42DEF4AD400B79484 /* GoogleSignInSwift */; };
+		30A6EC092E9D2AF9004437EB /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 30A6EC082E9D2AF9004437EB /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		3030A14A2DB1B6D70070E0E3 /* SimplePhotoEditor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SimplePhotoEditor.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		30A6EC082E9D2AF9004437EB /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -56,6 +58,7 @@
 		3030A1412DB1B6D70070E0E3 = {
 			isa = PBXGroup;
 			children = (
+				30A6EC082E9D2AF9004437EB /* Localizable.xcstrings */,
 				3030A14C2DB1B6D70070E0E3 /* SimplePhotoEditor */,
 				3030A14B2DB1B6D70070E0E3 /* Products */,
 			);
@@ -114,11 +117,12 @@
 				};
 			};
 			buildConfigurationList = 3030A1452DB1B6D70070E0E3 /* Build configuration list for PBXProject "SimplePhotoEditor" */;
-			developmentRegion = en;
+			developmentRegion = ru;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
+				ru,
 			);
 			mainGroup = 3030A1412DB1B6D70070E0E3;
 			minimizedProjectReferenceProxies = 1;
@@ -141,6 +145,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				30A6EC092E9D2AF9004437EB /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -217,6 +222,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -274,6 +280,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -288,11 +295,13 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/SimplePhotoEditor/App/Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Нужен доступ к камере, чтобы делать снимки";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Приложение сохраняет отредактированные фото в вашу фотоплёнку.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Приложение использует фотогалерею, чтобы вы могли выбрать изображение для редактирования.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -301,9 +310,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = iKorobov.SimplePhotoEditor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -317,11 +330,13 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/SimplePhotoEditor/App/Info.plist";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Нужен доступ к камере, чтобы делать снимки";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Приложение сохраняет отредактированные фото в вашу фотоплёнку.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Приложение использует фотогалерею, чтобы вы могли выбрать изображение для редактирования.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -330,9 +345,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = iKorobov.SimplePhotoEditor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

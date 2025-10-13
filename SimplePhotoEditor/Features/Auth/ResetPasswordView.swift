@@ -2,7 +2,10 @@ import SwiftUI
 
 struct ResetPasswordView: View {
     @StateObject var vm: ResetPasswordViewModel
-    @EnvironmentObject var router: AuthRouter
+    @Environment(\.dismiss) private var dismiss
+
+    @FocusState private var emailFocused: Bool
+    @State private var emailVisited = false
 
     var body: some View {
         VStack(spacing: 32) {
@@ -16,7 +19,15 @@ struct ResetPasswordView: View {
                 placeholder: "Электронная почта",
                 text: $vm.email,
                 keyboard: .emailAddress,
-                textContentType: .emailAddress
+                textContentType: .emailAddress,
+                isFocused: $emailFocused
+            )
+            .onChange(of: emailFocused) {
+                if !emailFocused { emailVisited = true }
+            }
+            .validationMessage(
+                "Введите корректный email.",
+                visible: emailVisited && !emailFocused && !vm.email.isEmpty && !EmailValidator.isValid(vm.email)
             )
 
             // Кнопка отправки
@@ -45,13 +56,9 @@ struct ResetPasswordView: View {
             "Письмо отправлено",
             isPresented: $vm.didSend
         ) {
-            Button("OK") {
-                // Возвращаемся назад
-                router.path.removeLast()
-            }
+            Button("OK") { dismiss() }
         } message: {
             Text("Проверьте вашу почту для дальнейших инструкций.")
         }
     }
 }
-

@@ -8,7 +8,6 @@ struct TextToolsToolbar: View {
     let onDone: () -> Void
     
     private let swatches: [Color] = [.white, .black, .red, .orange, .yellow, .green, .blue, .purple]
-    // Регулирует визуальный зазор между иконками слева (сохраняя единый стеклянный блок)
     private let leftItemPadding: CGFloat = 8
     private let leftItemSize: CGSize = .init(width: 44, height: 44)
     
@@ -45,7 +44,7 @@ struct TextToolsToolbar: View {
                     .glassEffectUnion(id: "textRight", namespace: glassNamespace)
                 }
                 
-                Button("Готово", action: onDone)
+                Button(String(localized: "common.done"), action: onDone)
                     .frame(height: 44)
                     .padding(.horizontal, 14)
                     .font(.callout)
@@ -57,18 +56,18 @@ struct TextToolsToolbar: View {
         .padding(.horizontal)
     }
     
-    
     private var colorMenu: some View {
         ColorPicker("", selection: $vm.currentColor, supportsOpacity: true)
             .labelsHidden()
-            .contentShape(Rectangle()) // чтобы паддинг тоже был кликабельным
+            .contentShape(Rectangle())
     }
     
     private var sizeMenu: some View {
         Menu {
-            Picker("Size", selection: $vm.currentSize) {
+            Picker(String(localized: "editor.size.label"), selection: $vm.currentSize) {
                 ForEach([12,14,16,18,24,32,48,72], id: \.self) { s in
-                    Text("\(s) pt").tag(Double(s))
+                    let fmt = String(localized: "editor.size.value.fmt")
+                    Text(String(format: fmt, locale: .current, Int64(s))).tag(Double(s))
                 }
             }
         } label: {
@@ -81,30 +80,28 @@ struct TextToolsToolbar: View {
     private var fontMenu: some View {
         Menu(
             content: {
-                Picker("Font", selection: $vm.currentFont) {
+                Picker(String(localized: "editor.font.label"), selection: $vm.currentFont) {
                     ForEach(vm.curatedFonts) { opt in
                         Text(opt.displayName).tag(opt)
                     }
                 }
             },
             label: {
-                Text("Aa")
+                Text(String(localized: "editor.font.sample"))
                     .font(vm.currentFont.font(size: 16))
                     .frame(width: leftItemSize.width, height: leftItemSize.height)
-                    .accessibilityLabel("Font")
+                    .accessibilityLabel(String(localized: "editor.font.label"))
                     .contentShape(Rectangle())
             }
         )
     }
 }
 
-
 #Preview("TextToolsToolbar") {
     var vm = TextOverlayViewModel()
     vm.currentSize = 24
     vm.currentColor = .white
 
-    // показать кнопку «Удалить» и активное редактирование:
     let item = TextItem(
         text: "Текст",
         font: .system,
@@ -122,5 +119,5 @@ struct TextToolsToolbar: View {
             .padding()
             .background(Color(.systemGroupedBackground))
     }
-    .frame(height: 240) // чтобы было видно тень и стекло
+    .frame(height: 240)
 }

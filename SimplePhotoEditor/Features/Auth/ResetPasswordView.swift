@@ -9,14 +9,12 @@ struct ResetPasswordView: View {
 
     var body: some View {
         VStack(spacing: 32) {
-            // Заголовок экрана
-            Text("Восстановление пароля")
+            Text(String(localized: "auth.reset.header"))
                 .font(.largeTitle.weight(.bold))
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            // Поле для email
             AuthTextField(
-                placeholder: "Электронная почта",
+                placeholder: String(localized: "auth.email.placeholder"),
                 text: $vm.email,
                 keyboard: .emailAddress,
                 textContentType: .emailAddress,
@@ -26,19 +24,17 @@ struct ResetPasswordView: View {
                 if !emailFocused { emailVisited = true }
             }
             .validationMessage(
-                "Введите корректный email.",
+                String(localized: "auth.validation.email.invalid"),
                 visible: emailVisited && !emailFocused && !vm.email.isEmpty && !EmailValidator.isValid(vm.email)
             )
 
-            // Кнопка отправки
             PrimaryActionButton(
-                title: "Отправить ссылку",
+                title: String(localized: "auth.reset.send_link"),
                 enabled: vm.canReset
             ) {
                 Task { await vm.resetPassword() }
             }
 
-            // Индикатор загрузки
             if vm.isLoading {
                 ProgressView()
                     .progressViewStyle(.circular)
@@ -47,18 +43,16 @@ struct ResetPasswordView: View {
             Spacer()
         }
         .padding(24)
-        .navigationTitle("Забыли пароль?")
+        .navigationTitle(String(localized: "auth.reset.title"))
         .navigationBarTitleDisplayMode(.inline)
-        // Ошибки авторизации
-        .alertLocalizedError($vm.error, title: "Ошибка")
-        // Успешная отправка
+        .alertLocalizedError($vm.error, title: String(localized: "common.error"))
         .alert(
-            "Письмо отправлено",
+            String(localized: "auth.registration.verification.title"),
             isPresented: $vm.didSend
         ) {
-            Button("OK") { dismiss() }
+            Button(String(localized: "common.ok")) { dismiss() }
         } message: {
-            Text("Проверьте вашу почту для дальнейших инструкций.")
+            Text(String(localized: "auth.reset.message"))
         }
     }
 }

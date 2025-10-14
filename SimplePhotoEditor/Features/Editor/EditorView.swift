@@ -19,6 +19,9 @@ struct EditorView: View {
     @State private var libraryItem: PhotosPickerItem?
     @State private var shareURL: URL?
     
+    // NEW: диалог выбора формата шаринга
+    @State private var showShareFormatDialog = false
+    
     @FocusState private var focusedItemID: UUID?
     @State private var imageSelectionToken = UUID()
     private let panelH: CGFloat = 96
@@ -73,6 +76,21 @@ struct EditorView: View {
         }
         .sheet(item: $vm.shareItem, onDismiss: vm.clearShareItem) { item in
             ShareSheet(items: [item.image])
+        }
+        // NEW: диалог выбора формата при каждом Share
+        .confirmationDialog(
+            String(localized: "Выберите формат"),
+            isPresented: $showShareFormatDialog
+        ) {
+            Button("Поделиться как PNG") {
+                vm.exportAsPNG = true
+                vm.share(drawingOverlay: drawing)
+            }
+            Button("Поделиться как JPEG") {
+                vm.exportAsPNG = false
+                vm.share(drawingOverlay: drawing)
+            }
+            Button(String(localized: "common.cancel"), role: .cancel) { }
         }
         .onReceive(keyboard.$height) { newH in
             vm.updateKeyboard(h: newH)
@@ -223,7 +241,10 @@ extension EditorView {
         EditorNavigationBar(
             showSourceDialog: $showSourceDialog,
             isShareEnabled: vm.previewImage != nil,
-            onShare: { vm.share(drawingOverlay: drawing) },
+            onShare: {
+                // вместо прямого vm.share — показываем диалог выбора формата
+                showShareFormatDialog = true
+            },
             onLogout: onLogout
         )
     }
@@ -259,6 +280,21 @@ private final class DummyExportService: ExportService {
             .appendingPathComponent(UUID().uuidString + ".jpg")
         try data.write(to: url, options: .atomic)
         return url
+    }
+    // NEW: реализуем PNG-перегрузку, чтобы соответствовать протоколу
+    func makeShareURL(from data: Data, asPNG: Bool) throws -> URL {
+        if asPNG {
+            guard let ui = UIImage(data: data),
+                  let png = ui.pngData()
+            else { throw ExportError.encodeFailed }
+            let url = FileManager.default.temporaryDirectory
+                .appendingPathComponent(UUID().uuidString)
+                .appendingPathExtension("png")
+            try png.write(to: url, options: .atomic)
+            return url
+        } else {
+            return try makeShareURL(from: data)
+        }
     }
     func saveToPhotos(_ data: Data) async throws {
         // В превью ничего не делаем

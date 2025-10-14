@@ -12,11 +12,11 @@ struct ImageSourcePicker: View {
     
     var body: some View {
         Color.clear
-            .confirmationDialog("Источник изображения",
+            .confirmationDialog(String(localized: "editor.source.title"),
                                 isPresented: $showDialog) {
-                Button("Камера")  { openCamera() }
-                Button("Галерея") { showLibrary = true }
-                Button("Отмена", role: .cancel) { }
+                Button(String(localized: "editor.camera"))  { openCamera() }
+                Button(String(localized: "editor.gallery")) { showLibrary = true }
+                Button(String(localized: "common.cancel"), role: .cancel) { }
             }
                                 .fullScreenCover(isPresented: $showCamera) {
                                     CameraPicker { uiImage in
@@ -41,16 +41,16 @@ struct ImageSourcePicker: View {
                                         showLibrary = false
                                     }
                                 }
-                                .alert("Нет доступа к камере",
+                                .alert(String(localized: "editor.no_access_camera.title"),
                                        isPresented: $showPermissionAlert) {
-                                    Button("Настройки") {
+                                    Button(String(localized: "common.settings")) {
                                         if let url = URL(string: UIApplication.openSettingsURLString) {
                                             UIApplication.shared.open(url)
                                         }
                                     }
-                                    Button("Отмена", role: .cancel) { }
+                                    Button(String(localized: "common.cancel"), role: .cancel) { }
                                 } message: {
-                                    Text("Разрешите доступ к камере в настройках устройства.")
+                                    Text(String(localized: "editor.no_access_camera.message"))
                                 }
     }
     

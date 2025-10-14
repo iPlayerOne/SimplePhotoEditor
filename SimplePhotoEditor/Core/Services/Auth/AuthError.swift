@@ -9,6 +9,7 @@ enum AuthError: Error, Identifiable {
     case weakPassword
     case userDisabled
     case tooManyRequests
+    case emailNotVerified   // NEW: требуем подтверждения email
 
     // MARK: Google
     case accountExistsWithDifferentCredential
@@ -38,6 +39,8 @@ enum AuthError: Error, Identifiable {
             return String(localized: "auth.error.user_disabled")
         case .tooManyRequests:
             return String(localized: "auth.error.too_many_requests")
+        case .emailNotVerified:
+            return String(localized: "auth.error.email_not_verified") // NEW
 
         case .accountExistsWithDifferentCredential:
             return String(localized: "auth.error.account_exists_with_different_credential")

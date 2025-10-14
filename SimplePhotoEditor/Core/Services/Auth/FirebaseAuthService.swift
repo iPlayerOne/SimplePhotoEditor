@@ -49,6 +49,14 @@ final class FirebaseAuthService: AuthService {
                 withEmail: email,
                 password: password
             )
+
+            // Политика: требуем подтверждения email перед входом
+            if result.user.isEmailVerified == false {
+                // Не держим пользователя залогиненным, если не верифицирован
+                try? Auth.auth().signOut()
+                throw AuthError.emailNotVerified
+            }
+
             guard let mail = result.user.email else {
                 throw AuthError.unknown
             }
@@ -61,6 +69,8 @@ final class FirebaseAuthService: AuthService {
                     throw AuthError.wrongPassword
                 case .userNotFound:
                     throw AuthError.userNotFound
+                case .userDisabled:
+                    throw AuthError.userDisabled
                 case .networkError:
                     throw AuthError.networkError(underlying: ns)
                 default:

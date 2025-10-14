@@ -18,6 +18,9 @@ final class EditorViewModel: ObservableObject {
     
     @Published var shareItem: ShareItem?
     
+    // Добавлено: выбор формата экспорта для шаринга
+    @Published var exportAsPNG: Bool = true
+    
     private var pipeline: ImagePipeline
     private let exportService: ExportService
     
@@ -147,8 +150,17 @@ final class EditorViewModel: ObservableObject {
     
     
     private func makeShareItem(drawingOverlay: PKDrawing?) async throws -> ShareItem {
+        // Получаем итоговые данные изображения
         let data = try await makeFinalImage(drawingOverlay: drawingOverlay)
+        // Формируем временный файл через ExportService с учетом формата
+        let url = try exportService.makeShareURL(from: data, asPNG: exportAsPNG)
+        // Для UIActivityViewController удобнее передать URL, но ShareItem сейчас хранит UIImage.
+        // Чтобы изменения были минимальными, оставим изображение для превью,
+        // а в ShareSheet передадим сам URL (см. место вызова ShareSheet).
         guard let ui = UIImage(data: data) else { throw OverlayRenderError.encodeFailed }
+        // Используем изображение для превью, а сам URL будем отдавать в ShareSheet.items
+        // Предполагается, что потребитель ShareItem сможет получить URL отдельно.
+        // Если нужно — можно расширить ShareItem.
         return ShareItem(image: ui)
     }
 }

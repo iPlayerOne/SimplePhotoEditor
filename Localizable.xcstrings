@@ -4,12 +4,6 @@
     "" : {
 
     },
-    "%lld pt" : {
-
-    },
-    "Aa" : {
-
-    },
     "auth.email.placeholder" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -77,6 +71,9 @@
           }
         }
       }
+    },
+    "auth.error.email_not_verified" : {
+
     },
     "auth.error.invalid_credential" : {
       "extractionState" : "manual",
@@ -299,6 +296,12 @@
         }
       }
     },
+    "auth.login.google_button" : {
+
+    },
+    "auth.login.header" : {
+
+    },
     "auth.login.sign_in" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -332,6 +335,12 @@
           }
         }
       }
+    },
+    "auth.login.signin" : {
+
+    },
+    "auth.login.signup" : {
+
     },
     "auth.login.title" : {
       "extractionState" : "manual",
@@ -962,67 +971,16 @@
         }
       }
     },
-    "Font" : {
-
-    },
-    "Forgot Password?" : {
-
-    },
-    "OK" : {
-
-    },
-    "Sign In" : {
-
-    },
-    "Sign Up" : {
-
-    },
-    "Size" : {
-
-    },
-    "Welcome Back" : {
-
-    },
-    "Восстановление пароля" : {
-
-    },
-    "Галерея" : {
-
-    },
-    "Готово" : {
-
-    },
-    "Забыли пароль?" : {
-
-    },
-    "Источник изображения" : {
-
-    },
-    "Камера" : {
+    "Выберите формат" : {
 
     },
     "Нажмите, чтобы добавить текст" : {
 
     },
-    "Настройки" : {
+    "Поделиться как JPEG" : {
 
     },
-    "Недоступно" : {
-
-    },
-    "Нет доступа к камере" : {
-
-    },
-    "Отмена" : {
-
-    },
-    "Письмо отправлено" : {
-
-    },
-    "Проверьте вашу почту для дальнейших инструкций." : {
-
-    },
-    "Разрешите доступ к камере в настройках устройства." : {
+    "Поделиться как PNG" : {
 
     }
   },

@@ -1,5 +1,3 @@
-// Features/Auth/LoginView.swift
-
 import SwiftUI
 import GoogleSignInSwift
 
@@ -40,7 +38,7 @@ struct LoginView: View {
 
     var body: some View {
         VStack(spacing: 32) {
-            Text("Welcome Back")
+            Text(String(localized: "auth.login.header"))
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -48,7 +46,7 @@ struct LoginView: View {
             VStack(spacing: 16) {
                 // Email
                 AuthTextField(
-                    placeholder: "Email",
+                    placeholder: String(localized: "auth.email.placeholder"),
                     text: $vm.email,
                     keyboard: .emailAddress,
                     textContentType: .emailAddress,
@@ -58,13 +56,17 @@ struct LoginView: View {
                     if !emailFocused { emailVisited = true }
                 }
                 .validationMessage(
-                    "Enter a valid email.",
+                    String(localized: "auth.validation.email.invalid"),
                     visible: emailVisited && !emailFocused && !vm.email.isEmpty && !EmailValidator.isValid(vm.email)
                 )
+                .submitLabel(.next)
+                .onSubmit {
+                    passwordFocused = true
+                }
 
                 // Password
                 AuthTextField(
-                    placeholder: "Password (min 6)",
+                    placeholder: String(localized: "auth.password.placeholder"),
                     text: $vm.password,
                     isSecure: true,
                     textContentType: .password,
@@ -74,15 +76,24 @@ struct LoginView: View {
                     if !passwordFocused { passwordVisited = true }
                 }
                 .validationMessage(
-                    "Password is too short (min 6).",
+                    String(localized: "auth.validation.password.short"),
                     visible: passwordVisited && !passwordFocused && !vm.password.isEmpty && vm.password.count < 6
                 )
+                .submitLabel(.go)
+                .onSubmit {
+                    Task {
+                        await vm.login()
+                        if vm.error == nil {
+                            onSuccess()
+                        }
+                    }
+                }
             }
 
             // MARK: – Кнопки действий
             VStack(spacing: 16) {
                 PrimaryActionButton(
-                    title: "Sign In",
+                    title: String(localized: "auth.login.signin"),
                     enabled: vm.canSignIn
                 ) {
                     Task {
@@ -106,13 +117,14 @@ struct LoginView: View {
                                 onSuccess()
                             }
                         } catch {
-                            // отмена или ошибки обработать при необходимости
+                            // отмена или другие ошибки обрабатываются в VM (popupClosedByUser игнорируется)
                         }
                     }
                 }
                 .frame(height: 44)
                 .cornerRadius(8)
                 .disabled(vm.isLoading)
+                .accessibilityLabel(Text(String(localized: "auth.login.google_button")))
             }
 
             // MARK: – Индикатор загрузки
@@ -123,14 +135,14 @@ struct LoginView: View {
 
             // MARK: – Навигация Sign Up / Reset Password
             HStack {
-                Button("Sign Up") {
+                Button(String(localized: "auth.login.signup")) {
                     authRouter.path.append(.signUp)
                 }
                 .buttonStyle(.authSecondary)
 
                 Spacer()
 
-                Button("Forgot Password?") {
+                Button(String(localized: "auth.login.forgot")) {
                     showReset = true
                 }
                 .buttonStyle(.authSecondary)
@@ -140,8 +152,8 @@ struct LoginView: View {
             Spacer()
         }
         .padding(24)
-        .alertLocalizedError($vm.error, title: "Login Failed")
-        .navigationTitle("Sign In")
+        .alertLocalizedError($vm.error, title: String(localized: "auth.login.error.title"))
+        .navigationTitle(String(localized: "auth.login.title"))
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showReset) {
             ResetPasswordView(vm: makeResetVM())

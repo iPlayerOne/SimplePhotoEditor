@@ -18,7 +18,6 @@ struct AuthButtonStyle: ButtonStyle {
                     .fill(bg)
             )
             .overlay(
-                // Лёгкий штрих при нажатии, только если кнопка активна
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
                     .stroke(Color.white.opacity(configuration.isPressed && isEnabled ? 0.2 : 0), lineWidth: 1)
             )
@@ -26,7 +25,7 @@ struct AuthButtonStyle: ButtonStyle {
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
             .animation(.easeInOut(duration: 0.2), value: isEnabled)
             .accessibilityAddTraits(.isButton)
-            .accessibilityHint(isEnabled ? "" : "Недоступно")
+            .accessibilityHint(isEnabled ? "" : String(localized: "common.unavailable"))
     }
 }
 
@@ -34,7 +33,7 @@ extension ButtonStyle where Self == AuthButtonStyle {
     static var authPrimary: AuthButtonStyle { .init() }
 }
 
-// MARK: - Secondary (по желанию, для текстовых действий)
+// MARK: - Secondary
 struct AuthSecondaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
 

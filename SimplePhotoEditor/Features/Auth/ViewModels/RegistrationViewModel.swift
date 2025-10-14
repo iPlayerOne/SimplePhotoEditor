@@ -22,7 +22,8 @@ class RegistrationViewModel: ObservableObject {
         
         Publishers.CombineLatest3($email, $password, $repeatPassword)
             .map { email, pwd, rep in
-                let emailOK = email.contains("@") && email.contains(".")
+                // Используем единый валидатор EmailValidator.isValid
+                let emailOK = EmailValidator.isValid(email)
                 let pwdOK   = pwd.count >= 6
                 let match   = pwd == rep
                 return emailOK && pwdOK && match

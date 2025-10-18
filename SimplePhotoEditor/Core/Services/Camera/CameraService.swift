@@ -13,17 +13,17 @@ final class CameraAccessService: CameraAccess {
             return .unavailable
         }
         switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized:
-            return .granted
-        case .notDetermined:
-            let ok = await withCheckedContinuation { cont in
-                AVCaptureDevice.requestAccess(for: .video) { cont.resume(returning: $0) }
-            }
-            return ok ? .granted : .denied
-        case .denied, .restricted:
-            return .denied
-        @unknown default:
-            return .denied
+            case .authorized:
+                return .granted
+            case .notDetermined:
+                let ok = await withCheckedContinuation { cont in
+                    AVCaptureDevice.requestAccess(for: .video) { cont.resume(returning: $0) }
+                }
+                return ok ? .granted : .denied
+            case .denied, .restricted:
+                return .denied
+            @unknown default:
+                return .denied
         }
     }
 }

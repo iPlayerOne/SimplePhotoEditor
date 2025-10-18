@@ -1,12 +1,9 @@
 import PhotosUI
 import UIKit
 
-protocol ExportService {
-    func makeShareURL(from data: Data) throws -> URL
-    func saveToPhotos(_ data: Data) async throws
-
-    // NEW: точечная перегрузка для PNG
-    func makeShareURL(from data: Data, asPNG: Bool) throws -> URL
+enum ExportFormat {
+    case jpeg
+    case png
 }
 
 enum ExportError: Error {
@@ -14,40 +11,45 @@ enum ExportError: Error {
     case writeFailed
     case encodeFailed
 }
+protocol ExportService {
+    func makeShareURL(from data: Data, format: ExportFormat) throws -> URL
+    func saveToPhotos(_ data: Data) async throws
+}
+
+
 
 final class ExportServiceImpl: ExportService {
+    func makeShareURL(from data: Data, format: ExportFormat = .jpeg) throws -> URL {
+        switch format {
+        case .jpeg:
+            let url = FileManager.default.temporaryDirectory
+                .appendingPathComponent(UUID().uuidString)
+                .appendingPathExtension("jpg")
 
-    func makeShareURL(from data: Data) throws -> URL {
-        let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString + ".jpg")
-        do {
-            try data.write(to: url, options: .atomic)
+            guard (try? data.write(to: url, options: .atomic)) != nil else {
+                throw ExportError.writeFailed
+            }
+
+            print("📤 ExportService: wrote JPEG to \(url.lastPathComponent) (\(data.count) bytes)")
             return url
-        } catch {
-            throw ExportError.writeFailed
-        }
-    }
 
-    // NEW: PNG вариант без затрагивания остальной логики
-    func makeShareURL(from data: Data, asPNG: Bool) throws -> URL {
-        guard asPNG else {
-            return try makeShareURL(from: data)
-        }
-        // Конвертируем в PNG (если возможно) и сохраняем как .png
-        guard let ui = UIImage(data: data),
-              let pngData = ui.pngData()
-        else {
-            throw ExportError.encodeFailed
-        }
+        case .png:
+            guard let ui = UIImage(data: data),
+                  let pngData = ui.pngData()
+            else {
+                throw ExportError.encodeFailed
+            }
 
-        let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-            .appendingPathExtension("png")
-        do {
-            try pngData.write(to: url, options: .atomic)
+            let url = FileManager.default.temporaryDirectory
+                .appendingPathComponent(UUID().uuidString)
+                .appendingPathExtension("png")
+
+            guard (try? pngData.write(to: url, options: .atomic)) != nil else {
+                throw ExportError.writeFailed
+            }
+
+            print("📤 ExportService: wrote PNG to \(url.lastPathComponent) (\(pngData.count) bytes)")
             return url
-        } catch {
-            throw ExportError.writeFailed
         }
     }
 
@@ -60,6 +62,7 @@ final class ExportServiceImpl: ExportService {
             PHAssetCreationRequest.forAsset()
                 .addResource(with: .photo, data: data, options: nil)
         }
+        print("📸 ExportService: saved image to Photos (\(data.count) bytes)")
     }
 
     private func requestAddOnlyPermission() async throws -> Bool {

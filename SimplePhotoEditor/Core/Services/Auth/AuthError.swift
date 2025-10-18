@@ -1,7 +1,6 @@
 import Foundation
 
 enum AuthError: Error, Identifiable {
-    // MARK: - Email / Password
     case emailAlreadyInUse
     case invalidEmailFormat
     case userNotFound
@@ -9,9 +8,8 @@ enum AuthError: Error, Identifiable {
     case weakPassword
     case userDisabled
     case tooManyRequests
-    case emailNotVerified   // NEW: требуем подтверждения email
+    case emailNotVerified
 
-    // MARK: Google
     case accountExistsWithDifferentCredential
     case credentialAlreadyInUse
     case invalidCredential
@@ -40,8 +38,7 @@ enum AuthError: Error, Identifiable {
         case .tooManyRequests:
             return String(localized: "auth.error.too_many_requests")
         case .emailNotVerified:
-            return String(localized: "auth.error.email_not_verified") // NEW
-
+            return String(localized: "auth.error.email_not_verified")
         case .accountExistsWithDifferentCredential:
             return String(localized: "auth.error.account_exists_with_different_credential")
         case .credentialAlreadyInUse:

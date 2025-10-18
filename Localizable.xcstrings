@@ -937,6 +937,12 @@
         }
       }
     },
+    "editor.source.camera" : {
+
+    },
+    "editor.source.gallery" : {
+
+    },
     "editor.source.title" : {
       "extractionState" : "manual",
       "localizations" : {

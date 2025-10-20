@@ -17,7 +17,10 @@ struct PreviewArea: View {
 
     var body: some View {
         GeometryReader { geo in
-            let layoutImage = vm.previewImage ?? vm.originalImage
+            // ВАЖНО: метрики считаем по originalImage (стабильный аспект/размер),
+            // а не по previewImage. Превью может иметь дробный point-size и чуть иной аспект,
+            // из‑за чего fit «прыгает» на ~0.3 pt при смене картинки.
+            let layoutImage = vm.originalImage ?? vm.previewImage
             let metrics   = CanvasMetrics(
                 geo: geo,
                 baseImage: layoutImage,
@@ -35,7 +38,8 @@ struct PreviewArea: View {
                     isErasing: $isErasing,
                     showSourceDialog: $showSourceDialog,
                     focus: focus,
-                    bottomChromeHeight: bottomChromeHeight
+                    bottomChromeHeight: bottomChromeHeight,
+                    baseImage: layoutImage // <- используем ту же картинку, что и для метрик
                 )
                 // Убираем .id по Data?, либо хеш:
                 //.id(vm.inputData?.hashValue ?? 0)
@@ -76,4 +80,3 @@ extension PreviewArea {
         return max(0, effectiveKB - localBottom)
     }
 }
-

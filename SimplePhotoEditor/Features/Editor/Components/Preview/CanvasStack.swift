@@ -15,12 +15,14 @@ struct CanvasStack: View {
     let focus: FocusState<UUID?>.Binding
     let bottomChromeHeight: CGFloat
 
+    // ВАЖНО: используем тот же baseImage, что и в CanvasMetrics
+    let baseImage: UIImage?
+
     @State private var scale: CGFloat = 1
     @GestureState private var pinch: CGFloat = 1
 
     var body: some View {
         let maxSize = metrics.canvasSize
-        let baseImage = vm.previewImage ?? vm.originalImage
 
         let pinchGesture = MagnifyGesture()
             .updating($pinch) { value, state, _ in state = value.magnification }

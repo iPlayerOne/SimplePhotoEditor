@@ -36,16 +36,3 @@ struct FilterPreviewImage: View, Equatable {
     }
 }
 
-struct FilteredImage: View {
-    let baseImage: UIImage?
-    let filterName: String
-    
-    var body: some View {
-        if let baseImage {
-            FilteredImageView(baseImage: baseImage, filterName: filterName)
-        } else {
-            Color.gray.opacity(0.2)
-        }
-    }
-}
-

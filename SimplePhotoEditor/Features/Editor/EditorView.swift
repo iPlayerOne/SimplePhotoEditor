@@ -2,7 +2,7 @@ import SwiftUI
 import PhotosUI
 import PencilKit
 import Observation
-import CoreImage
+
 
 struct EditorView: View {
     @StateObject private var vm: EditorViewModel

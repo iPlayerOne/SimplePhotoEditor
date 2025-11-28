@@ -1,0 +1,5 @@
+project: SimplePhotoEditor.xcodeproj
+schemes:
+- SimplePhotoEditor
+targets:
+- SimplePhotoEditor

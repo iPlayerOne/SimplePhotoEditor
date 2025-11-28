@@ -50,7 +50,6 @@ final class LoginViewModel: ObservableObject {
                 idToken:     idToken,
                 accessToken: accessToken
             )
-            // при успехе въю вызовет onSuccess()
         }
         catch AuthError.popupClosedByUser {
             return

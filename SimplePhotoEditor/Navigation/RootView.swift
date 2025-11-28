@@ -1,5 +1,3 @@
-// Navigation/RootView.swift
-
 import SwiftUI
 
 struct RootView: View {

@@ -8,13 +8,9 @@ struct EditorView: View {
     @StateObject private var vm: EditorViewModel
     @StateObject private var keyboard = KeyboardObserver()
     @StateObject private var previewCache = FilterPreviewCache()
-
-    // Drawing
     @State private var drawing = PKDrawing()
     @State private var tool = PKInkingTool(.pen, color: .black, width: 5)
     @State private var isErasing = false
-
-    // Misc
     @FocusState private var focusedItemID: UUID?
     @State private var imageSelectionToken = UUID()
     private let panelH: CGFloat = 96
@@ -22,8 +18,6 @@ struct EditorView: View {
     private let cameraAccess: CameraAccess
     let filters = FilterProviderImpl().allFilters()
     let onLogout: () -> Void
-
-    // Локальные состояния презентаций (View-уровень)
     @State private var isSourceSheetPresented = false
     @State private var armCamera: Bool = false
     @State private var armLibrary: Bool = false
@@ -59,16 +53,12 @@ struct EditorView: View {
             }
         }
         .toolbar { navBar }
-
-        // Камера (fullscreen)
         .fullScreenCover(isPresented: $isCameraPresented) {
             CameraPicker { uiImage in
                 vm.handleCameraOutput(uiImage)
             }
             .ignoresSafeArea()
         }
-
-        // Библиотека (PhotosPicker)
         .photosPicker(
             isPresented: $isLibraryPresented,
             selection: Binding(
@@ -81,8 +71,6 @@ struct EditorView: View {
         .task(id: vm.libraryItem?.itemIdentifier) {
             vm.handleLibrarySelectionIfNeeded()
         }
-
-        // Шит выбора источника (только UI и локальные флаги)
         .sheet(isPresented: $isSourceSheetPresented, onDismiss: {
             if armCamera  { isCameraPresented  = true; armCamera  = false }
             if armLibrary { isLibraryPresented = true; armLibrary = false }
@@ -109,8 +97,6 @@ struct EditorView: View {
             )
             .presentationDragIndicator(.hidden)
         }
-
-        // Алерт «нет доступа к камере»
         .alert(
             String(localized: "editor.no_access_camera.title"),
             isPresented: $showNoAccessAlert
@@ -124,8 +110,6 @@ struct EditorView: View {
         } message: {
             Text(String(localized: "editor.no_access_camera.message"))
         }
-
-        // Системные обновления
         .onReceive(keyboard.$height) { vm.updateKeyboard(h: $0) }
         .onChange(of: vm.mode) { old, new in
             if new == .text, old != .text { vm.textVM.enterPlacement() }
@@ -142,8 +126,6 @@ struct EditorView: View {
         }
     }
 }
-
-// MARK: - Subviews
 
 extension EditorView {
     @ViewBuilder private var topTools: some View {
@@ -172,7 +154,7 @@ extension EditorView {
         )
         .coordinateSpace(name: "canvas")
     }
-
+    
     @ViewBuilder private var bottomTools: some View {
         Color.clear
             .safeAreaInset(edge: .bottom) {
@@ -214,7 +196,7 @@ extension EditorView {
 
     @ToolbarContentBuilder private var navBar: some ToolbarContent {
         EditorNavigationBar(
-            showSourceDialog: $isSourceSheetPresented, // локальный флаг показа шита
+            showSourceDialog: $isSourceSheetPresented,
             isShareEnabled: vm.previewImage != nil,
             onShareFormat: { format in
                 vm.exportFormat = format

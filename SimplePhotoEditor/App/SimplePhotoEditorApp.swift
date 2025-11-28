@@ -22,10 +22,6 @@ struct SimplePhotoEditorApp: App {
                 container: container,
                 onLogout:  { session.logout() }
             )
-            .onAppear {
-                let s = UIScreen.main
-                print("📱 scale=\(s.scale), nativeScale=\(s.nativeScale), bounds=\(s.bounds.size), nativeBounds=\(s.nativeBounds.size)")
-            }
             .environmentObject(session)
         }
     }

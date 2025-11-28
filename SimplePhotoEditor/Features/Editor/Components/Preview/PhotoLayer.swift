@@ -19,7 +19,7 @@ struct PhotoLayer: View {
         cornerRadius: CGFloat = 16,
         placeholderBackground: Color = .secondary.opacity(0.08),
         placeholderIconName: String = "photo.on.rectangle.angled",
-        placeholderText: String = "Добавить изображение"
+        placeholderText: String = String(localized: "editor.photo.placeholder")
     ) {
         self.image = image
         self.maxSize = maxSize
@@ -49,50 +49,17 @@ struct PhotoLayer: View {
                     .aspectRatio(contentMode: contentMode)
                     .frame(width: w, height: h)
                     .clipped()
-                    #if DEBUG
-                    .overlay(
-                        Rectangle()
-                            .stroke(Color.red.opacity(0.6), lineWidth: 1)
-                    )
-                    .onAppear {
-                        print("🖼 PhotoLayer appear: mode=\(mode), container=\(maxSize) snapped=(\(w.rounded()),\(h.rounded())) image=\(CGSize(width: iw, height: ih)) scale=\(scale)")
-                    }
-                    .onChange(of: maxSize) { new in
-                        let sw = snapToPixel(new.width, scale: scale)
-                        let sh = snapToPixel(new.height, scale: scale)
-                        print("🖼 PhotoLayer size change: mode=\(mode), container=\(new) snapped=(\(sw.rounded()),\(sh.rounded())) image=\(CGSize(width: iw, height: ih))")
-                    }
-                    #endif
             } else if let onAddImage {
                 Button(action: onAddImage) {
                     placeholder
                 }
-                .buttonStyle(.glass)
+                .buttonStyle(.plain)
                 .frame(width: w, height: h)
-                #if DEBUG
-                .overlay(
-                    Rectangle()
-                        .stroke(Color.orange.opacity(0.6), lineWidth: 1)
-                )
-                #endif
             } else {
                 placeholder
-                    #if DEBUG
-                    .overlay(
-                        Rectangle()
-                            .stroke(Color.orange.opacity(0.6), lineWidth: 1)
-                    )
-                    #endif
             }
         }
         .frame(width: maxSize.width, height: maxSize.height, alignment: .center)
-        #if DEBUG
-        .background(Color.yellow.opacity(0.03))
-        .overlay(
-            Rectangle()
-                .stroke(Color.blue.opacity(0.5), style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
-        )
-        #endif
     }
     
     private var placeholder: some View {

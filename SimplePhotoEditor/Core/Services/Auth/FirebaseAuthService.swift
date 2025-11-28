@@ -43,6 +43,10 @@ final class FirebaseAuthService: AuthService {
         }
     }
     
+    private func _peripheryProbe() {
+        print("never used")
+    }
+    
     func signIn(email: String, password: String) async throws -> User {
         do {
             let result = try await Auth.auth().signIn(

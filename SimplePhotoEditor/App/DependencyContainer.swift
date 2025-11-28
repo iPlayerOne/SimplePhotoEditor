@@ -7,17 +7,16 @@ final class AppDependencyContainer {
     private let filterService    = FilterServiceImpl()
     private let overlayService   = OverlayRenderServiceImpl()
     private let decodeService    = ImageDecodeServiceImpl()
-    private let previewService   = PreviewRenderServiceImpl()
     private let exportService    = ExportServiceImpl()
     
     let cameraAccessService: CameraAccess = CameraAccessService()
 
     private lazy var imagePipeline: ImagePipeline = {
         ImagePipelineImpl(
-            decode:   decodeService,
+            decode: decodeService,
             transform: transformService,
-            filter:    filterService,
-            overlay:   overlayService
+            filter: filterService,
+            overlay: overlayService
         )
     }()
 
@@ -26,7 +25,7 @@ final class AppDependencyContainer {
 
     init(authService: AuthService = FirebaseAuthService()) {
         _ = CIContextPool.shared
-        self.authService       = authService
+        self.authService = authService
         self.googleCoordinator = GoogleSignInCoordinatorImpl(
             clientID: AppConfig.googleClientID
         )
@@ -35,7 +34,7 @@ final class AppDependencyContainer {
 
     func makeLoginViewModel() -> LoginViewModel {
         LoginViewModel(
-            authService:       authService,
+            authService: authService,
             googleCoordinator: googleCoordinator
         )
     }
@@ -50,8 +49,13 @@ final class AppDependencyContainer {
 
     func makeEditorViewModel() -> EditorViewModel {
         EditorViewModel(
-            pipeline:       imagePipeline,
-            exportService:  exportService
+            pipeline: imagePipeline,
+            exportService: exportService,
+            textVM: makeTextOverlayViewModel()
         )
+    }
+
+    func makeTextOverlayViewModel() -> TextOverlayViewModel {
+        TextOverlayViewModel()
     }
 }

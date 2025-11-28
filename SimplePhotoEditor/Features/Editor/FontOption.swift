@@ -3,7 +3,7 @@ import CoreText
 
 enum FontOption: Hashable, Identifiable {
     case system, rounded, serif, monospaced
-    case named(String) // PostScript name
+    case named(String)
 
     var id: String {
         switch self {
@@ -15,7 +15,6 @@ enum FontOption: Hashable, Identifiable {
         }
     }
 
-    // Для UI (меню/превью в SwiftUI)
     var displayName: String {
         switch self {
         case .system:      return "System"
@@ -23,7 +22,6 @@ enum FontOption: Hashable, Identifiable {
         case .serif:       return "System Serif"
         case .monospaced:  return "System Monospaced"
         case .named(let ps):
-            // Красивое (локализованное) имя, если доступно
             let ct = CTFontCreateWithName(ps as CFString, 17, nil)
             return (CTFontCopyDisplayName(ct) as String?) ?? ps
         }
@@ -40,13 +38,11 @@ enum FontOption: Hashable, Identifiable {
         }
     }
 
-    // Мост для рендера (UIKit / NSAttributedString)
     func uiFont(size: CGFloat, weight: UIFont.Weight = .regular) -> UIFont {
         switch self {
         case .system:
             return .systemFont(ofSize: size, weight: weight)
         case .rounded, .serif, .monospaced:
-            // Официальный способ получить SF Rounded / New York / SF Mono
             let base = UIFont.systemFont(ofSize: size, weight: weight)
             let design: UIFontDescriptor.SystemDesign =
                 (self == .rounded) ? .rounded :

@@ -23,17 +23,15 @@ final class TextOverlayServiceImpl: TextOverlayService {
         UIGraphicsBeginImageContextWithOptions(size, false, baseImage.scale)
         defer { UIGraphicsEndImageContext() }
 
-        // Рисуем фон
         baseImage.draw(at: .zero)
 
-        // Рисуем каждый текст
         for item in items {
-            let font = item.font.uiFont(size: CGFloat(item.fontSize))          // <- UIFont
-             let color = item.color.uiColor                                     // <- UIColor
+            let font = item.font.uiFont(size: CGFloat(item.fontSize))
+             let color = item.color.uiColor
 
              let attrs: [NSAttributedString.Key: Any] = [
-                 .font: font,                                                  // требует UIFont
-                 .foregroundColor: color                                       // требует UIColor
+                 .font: font,
+                 .foregroundColor: color
              ]
             let ns = NSString(string: item.text)
             let textSize = ns.size(withAttributes: attrs)

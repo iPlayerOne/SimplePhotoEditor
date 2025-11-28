@@ -14,19 +14,30 @@ struct CanvasStack: View {
 
     let focus: FocusState<UUID?>.Binding
     let bottomChromeHeight: CGFloat
-
-    // ВАЖНО: используем тот же baseImage, что и в CanvasMetrics
     let baseImage: UIImage?
 
     @State private var scale: CGFloat = 1
     @GestureState private var pinch: CGFloat = 1
 
     var body: some View {
-        let maxSize = metrics.canvasSize
+        let maxSize       = metrics.canvasSize
+        let containerSize = metrics.containerSize
+
+        let turns = vm.rotationCount % 4
+        let isRotated90 = (turns == 1 || turns == 3)
+
+        let extraScale: CGFloat = {
+            guard isRotated90, maxSize.height > 0 else { return 1 }
+            return containerSize.height / maxSize.height
+        }()
 
         let pinchGesture = MagnifyGesture()
             .updating($pinch) { value, state, _ in state = value.magnification }
-            .onEnded { value in scale *= value.magnification }
+            .onEnded { value in
+                scale *= value.magnification
+            }
+
+        let zoom = extraScale * scale * pinch
 
         ZStack {
             PhotoLayer(
@@ -62,7 +73,7 @@ struct CanvasStack: View {
             flippedHorizontally: vm.isFlippedHorizontally,
             frameSize: metrics.canvasSize
         )
-        .scaleEffect(scale * pinch)
+        .scaleEffect(zoom)
         .simultaneousGesture(pinchGesture)
     }
 }

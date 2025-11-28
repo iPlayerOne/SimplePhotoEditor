@@ -1,6 +1,5 @@
 import SwiftUI
 
-// MARK: - Primary
 struct AuthButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
 
@@ -33,7 +32,6 @@ extension ButtonStyle where Self == AuthButtonStyle {
     static var authPrimary: AuthButtonStyle { .init() }
 }
 
-// MARK: - Secondary
 struct AuthSecondaryButtonStyle: ButtonStyle {
     @Environment(\.isEnabled) private var isEnabled
 

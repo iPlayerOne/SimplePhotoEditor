@@ -12,11 +12,9 @@ final class SessionStore: ObservableObject {
 
     init(authService: AuthService = FirebaseAuthService()) {
         self.authService = authService
-        // синхронный старт
         let initial = Auth.auth().currentUser != nil
         self.isAuthenticated = initial
 
-        // последующий контроль
         cancellable = authService.authStatePublisher
             .receive(on: DispatchQueue.main)
             .sink { [weak self] user in

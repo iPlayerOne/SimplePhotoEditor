@@ -18,7 +18,6 @@ struct RegistrationView: View {
                 .font(.largeTitle.weight(.bold))
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            // Email
             AuthTextField(
                 placeholder: String(localized: "auth.email.placeholder"),
                 text: $vm.email,
@@ -34,7 +33,6 @@ struct RegistrationView: View {
                 visible: emailVisited && !emailFocused && !vm.email.isEmpty && !EmailValidator.isValid(vm.email)
             )
 
-            // Пароль
             AuthTextField(
                 placeholder: String(localized: "auth.password.placeholder"),
                 text: $vm.password,
@@ -50,7 +48,6 @@ struct RegistrationView: View {
                 visible: passwordVisited && !passwordFocused && !vm.password.isEmpty && vm.password.count < 6
             )
 
-            // Повтор пароля
             AuthTextField(
                 placeholder: String(localized: "auth.password.repeat.placeholder"),
                 text: $vm.repeatPassword,

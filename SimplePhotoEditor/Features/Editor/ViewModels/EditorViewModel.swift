@@ -20,26 +20,23 @@ final class EditorViewModel: ObservableObject {
     @Published var canvasSize: CGSize = .zero
 
     @Published var shareItem: ShareItem?
-
-    // Формат экспорта
     @Published var exportFormat: ExportFormat = .png
-
-    // PhotosPicker selection (UI управляет показом, VM — данными)
     @Published var libraryItem: PhotosPickerItem?
 
     private var pipeline: ImagePipeline
     private let exportService: ExportService
-
-    let textVM = TextOverlayViewModel()
+    let textVM: TextOverlayViewModel
 
     private var cancellables = Set<AnyCancellable>()
 
     init(
         pipeline: ImagePipeline,
-        exportService: ExportService
+        exportService: ExportService,
+        textVM: TextOverlayViewModel
     ) {
         self.pipeline = pipeline
         self.exportService = exportService
+        self.textVM = textVM
 
         Publishers
             .CombineLatest($inputData, $selectedFilter)
@@ -96,12 +93,10 @@ final class EditorViewModel: ObservableObject {
 
     func share(drawingOverlay: PKDrawing?) {
         Task { @MainActor in
-            print("🛠 share started")
             do {
                 let item = try await makeShareItem(drawingOverlay: drawingOverlay)
                 shareItem = item
             } catch {
-                print("❌ share error:", error.localizedDescription)
             }
         }
     }
@@ -133,8 +128,7 @@ final class EditorViewModel: ObservableObject {
             downscaleFactor: 0.25
         )
 
-        let dt = CFAbsoluteTimeGetCurrent() - t0
-        print("⏱ Preview render time: \(dt) sec")
+        let _ = CFAbsoluteTimeGetCurrent() - t0
     }
 
     private func makeFinalImage(drawingOverlay: PKDrawing?) async throws -> Data {
@@ -160,9 +154,6 @@ final class EditorViewModel: ObservableObject {
         return ShareItem(image: ui)
     }
 
-    // MARK: - Источники изображений: бизнес-логика (без UI-флагов)
-
-    // Камера вернула UIImage
     func handleCameraOutput(_ uiImage: UIImage?) {
         guard let uiImage,
               let data = uiImage.jpegData(compressionQuality: 0.95) ?? uiImage.pngData()
@@ -170,7 +161,6 @@ final class EditorViewModel: ObservableObject {
         inputData = data
     }
 
-    // Пользователь выбрал элемент в PhotosPicker
     func handleLibrarySelectionIfNeeded() {
         guard let item = libraryItem else { return }
         Task { [weak self] in
@@ -196,7 +186,6 @@ final class EditorViewModel: ObservableObject {
                     }
                 }
             } catch {
-                print("❌ PhotosPicker load error:", error.localizedDescription)
             }
         }
     }

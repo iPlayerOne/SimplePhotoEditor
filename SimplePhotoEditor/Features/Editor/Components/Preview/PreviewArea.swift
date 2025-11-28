@@ -9,25 +9,24 @@ struct PreviewArea: View {
     @Binding var tool: PKInkingTool
     @Binding var isErasing: Bool
     @Binding var showSourceDialog: Bool
-    
+
     let focus: FocusState<UUID?>.Binding
 
     var bottomChromeHeight: CGFloat = 0
-    private let heightRatio: CGFloat = 1.0
+    private let heightRatio: CGFloat = 0.8
 
     var body: some View {
         GeometryReader { geo in
-            // ВАЖНО: метрики считаем по originalImage (стабильный аспект/размер),
-            // а не по previewImage. Превью может иметь дробный point-size и чуть иной аспект,
-            // из‑за чего fit «прыгает» на ~0.3 pt при смене картинки.
-            let layoutImage = vm.originalImage ?? vm.previewImage
-            let metrics   = CanvasMetrics(
+            let metricsImage = vm.originalImage ?? vm.previewImage
+            let displayImage = vm.previewImage ?? vm.originalImage
+
+            let metrics = CanvasMetrics(
                 geo: geo,
-                baseImage: layoutImage,
+                baseImage: metricsImage,
                 bottomChrome: bottomChromeHeight,
                 heightRatio: heightRatio
             )
-            
+
             ZStack {
                 CanvasStack(
                     metrics: metrics,
@@ -39,10 +38,8 @@ struct PreviewArea: View {
                     showSourceDialog: $showSourceDialog,
                     focus: focus,
                     bottomChromeHeight: bottomChromeHeight,
-                    baseImage: layoutImage // <- используем ту же картинку, что и для метрик
+                    baseImage: displayImage
                 )
-                // Убираем .id по Data?, либо хеш:
-                //.id(vm.inputData?.hashValue ?? 0)
                 .onTapGesture {
                     guard vm.mode == .text, textVM.isPlacing else { return }
                     let overlap = keyboardOverlap(
@@ -61,12 +58,14 @@ struct PreviewArea: View {
             .frame(width: geo.size.width, height: metrics.containerSize.height, alignment: .center)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             .clipped()
-            .modifier(CanvasSync(geo: geo,
-                                 metrics: metrics,
-                                 bottomChromeHeight: bottomChromeHeight,
-                                 vm: vm,
-                                 textVM: textVM,
-                                 baseImage: layoutImage))
+            .modifier(CanvasSync(
+                geo: geo,
+                metrics: metrics,
+                bottomChromeHeight: bottomChromeHeight,
+                vm: vm,
+                textVM: textVM,
+                baseImage: metricsImage
+            ))
         }
     }
 }

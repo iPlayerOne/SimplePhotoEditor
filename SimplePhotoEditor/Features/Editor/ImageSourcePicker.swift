@@ -7,7 +7,6 @@ struct ImageSourcePicker: View {
 
     var body: some View {
         VStack(spacing: 16) {
-            // Центрируем заголовок
             Text(String(localized: "editor.source.title"))
                 .font(.headline)
                 .frame(maxWidth: .infinity)

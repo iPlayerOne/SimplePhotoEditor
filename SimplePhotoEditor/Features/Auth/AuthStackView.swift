@@ -31,7 +31,6 @@ struct AuthStackView: View {
                     .environmentObject(authRouter)
 
                 case .resetPassword:
-                    // Больше не используется, но оставим для совместимости.
                     ResetPasswordView(
                         vm: container.makeResetPasswordViewModel()
                     )

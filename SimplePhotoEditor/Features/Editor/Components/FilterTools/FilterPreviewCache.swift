@@ -24,7 +24,6 @@ final class FilterPreviewCache: ObservableObject {
         let scale: CGFloat = maxSide > previewMaxSide ? (previewMaxSide / maxSide ) : 1
         
         worker = Task.detached(priority: .userInitiated) { [gen, jobs, src, scale] in
-            print("🧩 Prepare start gen=\(gen) jobs=\(jobs.count) ")
             var out: [UUID: UIImage] = [:]
             
             for (id, name) in jobs {
@@ -38,7 +37,6 @@ final class FilterPreviewCache: ObservableObject {
             
             await MainActor.run { [weak self] in
                 guard let self,gen == self.generation else { return }
-                print("✅ Prepare done gen=\(gen) count=\(result.count)")
                 self.previews = result
             }
         }

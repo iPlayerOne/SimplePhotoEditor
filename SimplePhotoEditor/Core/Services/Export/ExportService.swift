@@ -30,7 +30,6 @@ final class ExportServiceImpl: ExportService {
                 throw ExportError.writeFailed
             }
 
-            print("📤 ExportService: wrote JPEG to \(url.lastPathComponent) (\(data.count) bytes)")
             return url
 
         case .png:
@@ -48,7 +47,6 @@ final class ExportServiceImpl: ExportService {
                 throw ExportError.writeFailed
             }
 
-            print("📤 ExportService: wrote PNG to \(url.lastPathComponent) (\(pngData.count) bytes)")
             return url
         }
     }
@@ -62,7 +60,6 @@ final class ExportServiceImpl: ExportService {
             PHAssetCreationRequest.forAsset()
                 .addResource(with: .photo, data: data, options: nil)
         }
-        print("📸 ExportService: saved image to Photos (\(data.count) bytes)")
     }
 
     private func requestAddOnlyPermission() async throws -> Bool {

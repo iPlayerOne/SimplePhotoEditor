@@ -22,7 +22,6 @@ class RegistrationViewModel: ObservableObject {
         
         Publishers.CombineLatest3($email, $password, $repeatPassword)
             .map { email, pwd, rep in
-                // Используем единый валидатор EmailValidator.isValid
                 let emailOK = EmailValidator.isValid(email)
                 let pwdOK   = pwd.count >= 6
                 let match   = pwd == rep
@@ -38,7 +37,6 @@ class RegistrationViewModel: ObservableObject {
         do {
             let cleanEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
             _ = try await authService.register(email: cleanEmail, password: password)
-            // sendEmailVerification вызывается внутри FirebaseAuthService.register
             didRegister = true
         }
         catch let err as AuthError {

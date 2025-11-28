@@ -32,8 +32,7 @@ struct FilterPreviewImage: View, Equatable {
                 .font(.caption2)
                 .lineLimit(1)
         }
-        .frame(width: size + 18)    
-//        .contentShape(Rectangle())
+        .frame(width: size + 18)
     }
 }
 

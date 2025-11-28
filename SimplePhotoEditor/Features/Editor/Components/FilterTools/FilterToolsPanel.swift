@@ -7,17 +7,13 @@ struct FilterToolsPanel: View {
     @ObservedObject var cache: FilterPreviewCache
     let panelHeight: CGFloat
 
-    // Параметры верстки внутри панели
-    private let verticalPadding: CGFloat = 8      // как в .padding(.vertical, 8)
-    private let imageToTextSpacing: CGFloat = 6   // как во VStack(spacing: 6)
+    private let verticalPadding: CGFloat = 8
+    private let imageToTextSpacing: CGFloat = 6
 
-    // Динамический размер превью с учётом высоты панели и подписи
     private var previewSize: CGFloat {
         let contentHeight = panelHeight - verticalPadding * 2
         let captionLineHeight = UIFont.preferredFont(forTextStyle: .caption2).lineHeight
-        // Оставляем место под текст и межстрочный отступ
         let size = contentHeight - imageToTextSpacing - captionLineHeight
-        // Минимальный разумный размер, чтобы не схлопывалось на маленьких высотах
         return max(28, size.rounded(.down))
     }
 
@@ -38,10 +34,8 @@ struct FilterToolsPanel: View {
                 }
             }
             .padding(.vertical, verticalPadding)
-            .padding(.horizontal, 12) // внутренние поля контента
+            .padding(.horizontal, 12)
         }
-        // На iOS 17+ можно так:
-        // .contentMargins(.horizontal, 12, for: .scrollContent)
     }
 }
 

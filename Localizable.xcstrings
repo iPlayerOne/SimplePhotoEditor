@@ -73,7 +73,21 @@
       }
     },
     "auth.error.email_not_verified" : {
-
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please verify your email before signing in."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подтвердите email перед входом."
+          }
+        }
+      }
     },
     "auth.error.invalid_credential" : {
       "extractionState" : "manual",
@@ -297,10 +311,38 @@
       }
     },
     "auth.login.google_button" : {
-
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign in with Google"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Войти через Google"
+          }
+        }
+      }
     },
     "auth.login.header" : {
-
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign in to your account"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вход в аккаунт"
+          }
+        }
+      }
     },
     "auth.login.sign_in" : {
       "extractionState" : "manual",
@@ -337,10 +379,38 @@
       }
     },
     "auth.login.signin" : {
-
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign In"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Войти"
+          }
+        }
+      }
     },
     "auth.login.signup" : {
-
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign Up"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Создать аккаунт"
+          }
+        }
+      }
     },
     "auth.login.title" : {
       "extractionState" : "manual",
@@ -767,6 +837,57 @@
         }
       }
     },
+    "editor.export.format.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose format"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите формат"
+          }
+        }
+      }
+    },
+    "editor.export.share.jpeg" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share as JPEG"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поделиться как JPEG"
+          }
+        }
+      }
+    },
+    "editor.export.share.png" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share as PNG"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поделиться как PNG"
+          }
+        }
+      }
+    },
     "editor.font.label" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -903,6 +1024,23 @@
         }
       }
     },
+    "editor.photo.placeholder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add Image"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавить изображение"
+          }
+        }
+      }
+    },
     "editor.size.label" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -938,10 +1076,38 @@
       }
     },
     "editor.source.camera" : {
-
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Camera"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Камера"
+          }
+        }
+      }
     },
     "editor.source.gallery" : {
-
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gallery"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Галерея"
+          }
+        }
+      }
     },
     "editor.source.title" : {
       "extractionState" : "manual",
@@ -977,17 +1143,15 @@
         }
       }
     },
-    "Выберите формат" : {
-
-    },
     "Нажмите, чтобы добавить текст" : {
-
-    },
-    "Поделиться как JPEG" : {
-
-    },
-    "Поделиться как PNG" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to add text"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"

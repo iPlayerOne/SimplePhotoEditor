@@ -7,35 +7,30 @@ struct ValidationMessageModifier: ViewModifier {
     let color: Color
     let spacing: CGFloat
 
-    // Учитываем Dynamic Type
     private var lineHeight: CGFloat {
         UIFont.preferredFont(forTextStyle: .footnote).lineHeight
     }
 
     func body(content: Content) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            // Само поле
             content
 
-            // Полоса под подсказку фиксированной высоты
             ZStack(alignment: .leading) {
                 Text(message)
                     .font(.footnote)
-                    .foregroundStyle(color)      // красный по умолчанию
+                    .foregroundStyle(color)
                     .opacity(visible ? 1 : 0)
                     .accessibilityHidden(!visible)
                     .allowsHitTesting(false)
             }
-            .frame(height: lineHeight) // резервируем место всегда
+            .frame(height: lineHeight)
         }
-        // Небольшой зазор до следующего элемента
         .padding(.bottom, spacing)
         .animation(.default, value: visible)
     }
 }
 
 extension View {
-    // color — настраиваемый, по умолчанию .red
     func validationMessage(
         _ message: String,
         visible: Bool,

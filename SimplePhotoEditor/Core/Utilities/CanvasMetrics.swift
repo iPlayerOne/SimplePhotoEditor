@@ -10,8 +10,6 @@ struct CanvasMetrics {
     
     init(geo: GeometryProxy, baseImage: UIImage?, bottomChrome: CGFloat, heightRatio: CGFloat) {
             let scale = UIScreen.main.scale
-
-            // <- главное изменение: НЕ вычитаем bottomChrome
             let containerW = snapToPixel(geo.size.width,              scale: scale)
             let containerH = snapToPixel(geo.size.height * heightRatio, scale: scale)
 
@@ -29,7 +27,5 @@ struct CanvasMetrics {
                 self.h = containerH
             }
             self.canvasSize = CGSize(width: w, height: h)
-
-            print("📐 container=\(containerSize) image=\(baseImage?.size ?? .zero) fit=\(canvasSize)")
     }
 }

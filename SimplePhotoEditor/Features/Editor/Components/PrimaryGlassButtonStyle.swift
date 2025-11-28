@@ -7,7 +7,7 @@ struct SheetPrimaryGlassButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         let pressed   = configuration.isPressed && isEnabled
         let textTint  : Color = isCancel ? .white : .primary
-        let bgTint    : Color = isCancel ? .red.opacity(0.22) : .clear   // ← красим фон
+        let bgTint    : Color = isCancel ? .red.opacity(0.22) : .clear
         let strokeTint: Color = isCancel
         ? .red.opacity(pressed ? 0.60 : 0.40)
         : .white.opacity(pressed ? 0.25 : 0.12)
@@ -18,17 +18,9 @@ struct SheetPrimaryGlassButtonStyle: ButtonStyle {
             .frame(maxWidth: .infinity, minHeight: 60, alignment: .center)
             .contentShape(Capsule())
             .clipShape(Capsule())
-        
-        // фон капсулы (для Cancel — полупрозрачный красный)
             .background(Capsule().fill(bgTint))
-        
-        // стекло поверх формы
             .glassEffect(.regular.interactive(), in: Capsule())
-        
-        // обводка под роль
             .overlay(Capsule().stroke(strokeTint, lineWidth: 1))
-        
-        // цвет текста/символов
             .foregroundStyle(textTint)
             .tint(textTint)
         

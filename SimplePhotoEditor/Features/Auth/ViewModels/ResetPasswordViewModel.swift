@@ -24,7 +24,6 @@ class ResetPasswordViewModel: ObservableObject {
     func resetPassword() async {
         let cleanEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        // Валидация на отправку: показываем алерт и не идём в сеть
         guard EmailValidator.isValid(cleanEmail) else {
             self.error = .invalidEmailFormat
             return

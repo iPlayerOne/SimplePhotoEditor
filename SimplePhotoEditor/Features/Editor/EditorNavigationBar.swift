@@ -4,11 +4,8 @@ import PhotosUI
 struct EditorNavigationBar: ToolbarContent {
     @Binding var showSourceDialog: Bool
     let isShareEnabled: Bool
-    // Новый колбэк: выбор формата через enum
     let onShareFormat: (ExportFormat) -> Void
     let onLogout: () -> Void
-
-    // Локальный стейт для диалога, чтобы «привязать» к самой кнопке
     @State private var showShareFormatDialog = false
 
     var body: some ToolbarContent {
@@ -22,7 +19,6 @@ struct EditorNavigationBar: ToolbarContent {
         }
 
         ToolbarItemGroup(placement: .topBarTrailing) {
-            // Кнопка Share с привязанным confirmationDialog
             Button {
                 showShareFormatDialog = true
             } label: {
@@ -31,13 +27,13 @@ struct EditorNavigationBar: ToolbarContent {
             .disabled(!isShareEnabled)
             .labelStyle(.iconOnly)
             .confirmationDialog(
-                String(localized: "Выберите формат"),
+                String(localized: "editor.export.format.title"),
                 isPresented: $showShareFormatDialog
             ) {
-                Button("Поделиться как PNG") {
+                Button(String(localized: "editor.export.share.png")) {
                     onShareFormat(.png)
                 }
-                Button("Поделиться как JPEG") {
+                Button(String(localized: "editor.export.share.png")) {
                     onShareFormat(.jpeg)
                 }
                 Button(String(localized: "common.cancel"), role: .cancel) { }

@@ -25,6 +25,7 @@ final class EditorViewModel: ObservableObject {
 
     private var pipeline: ImagePipeline
     private let exportService: ExportService
+    private let imageImportService: ImageImportService
     let textVM: TextOverlayViewModel
 
     private var cancellables = Set<AnyCancellable>()
@@ -32,11 +33,13 @@ final class EditorViewModel: ObservableObject {
     init(
         pipeline: ImagePipeline,
         exportService: ExportService,
-        textVM: TextOverlayViewModel
+        textVM: TextOverlayViewModel,
+        imageImportService: ImageImportService
     ) {
         self.pipeline = pipeline
         self.exportService = exportService
         self.textVM = textVM
+        self.imageImportService = imageImportService
 
         Publishers
             .CombineLatest($inputData, $selectedFilter)
@@ -78,21 +81,12 @@ final class EditorViewModel: ObservableObject {
         toogleMode(.text)
     }
 
-    func finishMarkup() {
-        setMode(.filters)
-    }
-
     func updateKeyboard(h: CGFloat) {
         keyboardHeight = h
     }
 
-    func exportFinalImage(drawingOverlay: PKDrawing? = nil) async throws {
-        let data = try await makeFinalImage(drawingOverlay: drawingOverlay)
-        try await exportService.saveToPhotos(data)
-    }
-
     func share(drawingOverlay: PKDrawing?) {
-        Task { @MainActor in
+        Task {
             do {
                 let item = try await makeShareItem(drawingOverlay: drawingOverlay)
                 shareItem = item
@@ -103,6 +97,16 @@ final class EditorViewModel: ObservableObject {
 
     func clearShareItem() {
         shareItem = nil
+    }
+    
+    func resetForNewImage() {
+        mode = .filters
+        selectedFilter = nil
+        rotationCount = 0
+        isFlippedHorizontally = false
+        shareItem = nil
+        textVM.reset()
+        textVM.finishEditing()
     }
 
     private func applyMode(from old: EditorMode, to new: EditorMode) {
@@ -155,34 +159,25 @@ final class EditorViewModel: ObservableObject {
     }
 
     func handleCameraOutput(_ uiImage: UIImage?) {
-        guard let uiImage,
-              let data = uiImage.jpegData(compressionQuality: 0.95) ?? uiImage.pngData()
-        else { return }
+        guard let data = imageImportService.dataFromCameraImage(uiImage) else { return }
         inputData = data
     }
 
     func handleLibrarySelectionIfNeeded() {
         guard let item = libraryItem else { return }
+        
+        defer {
+            Task {
+                self.libraryItem = nil  
+            }
+        }
+        
         Task { [weak self] in
             guard let self else { return }
             do {
-                if let data = try await item.loadTransferable(type: Data.self) {
+                if let data = try await imageImportService.loadData(from: item) {
                     await MainActor.run { [weak self] in
                         self?.inputData = data
-                    }
-                } else if let url = try await item.loadTransferable(type: URL.self) {
-                    let data = try Data(contentsOf: url)
-                    await MainActor.run { [weak self] in
-                        self?.inputData = data
-                    }
-                } else if let swiftUIImage = try await item.loadTransferable(type: Image.self) {
-                    let renderer = ImageRenderer(content: swiftUIImage)
-                    renderer.scale = UIScreen.main.scale
-                    if let uiImage = renderer.uiImage,
-                       let data = uiImage.jpegData(compressionQuality: 0.95) ?? uiImage.pngData() {
-                        await MainActor.run { [weak self] in
-                            self?.inputData = data
-                        }
                     }
                 }
             } catch {

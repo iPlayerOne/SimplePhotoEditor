@@ -6,8 +6,6 @@ struct PhotoLayer: View {
     let onAddImage: (() -> Void)?
     
     let contentMode: ContentMode
-    let cornerRadius: CGFloat
-    let placeholderBackground: Color
     let placeholderIconName: String
     let placeholderText: String
     
@@ -16,8 +14,6 @@ struct PhotoLayer: View {
         maxSize: CGSize,
         onAddImage: (() -> Void)? = nil,
         contentMode: ContentMode = .fit,
-        cornerRadius: CGFloat = 16,
-        placeholderBackground: Color = .secondary.opacity(0.08),
         placeholderIconName: String = "photo.on.rectangle.angled",
         placeholderText: String = String(localized: "editor.photo.placeholder")
     ) {
@@ -25,8 +21,6 @@ struct PhotoLayer: View {
         self.maxSize = maxSize
         self.onAddImage = onAddImage
         self.contentMode = contentMode
-        self.cornerRadius = cornerRadius
-        self.placeholderBackground = placeholderBackground
         self.placeholderIconName = placeholderIconName
         self.placeholderText = placeholderText
     }

@@ -33,5 +33,4 @@ struct SheetPrimaryGlassButtonStyle: ButtonStyle {
 
 extension ButtonStyle where Self == SheetPrimaryGlassButtonStyle {
     static func sheetPrimaryGlass(isCancel: Bool = false) -> SheetPrimaryGlassButtonStyle { .init(isCancel: isCancel) }
-    static var sheetPrimaryGlassCancel: SheetPrimaryGlassButtonStyle { .init(isCancel: true) }
 }

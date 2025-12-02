@@ -7,7 +7,6 @@ struct TextToolsToolbar: View {
     @Bindable var vm: TextOverlayViewModel
     let onDone: () -> Void
     
-    private let swatches: [Color] = [.white, .black, .red, .orange, .yellow, .green, .blue, .purple]
     private let leftItemPadding: CGFloat = 8
     private let leftItemSize: CGSize = .init(width: 44, height: 44)
     

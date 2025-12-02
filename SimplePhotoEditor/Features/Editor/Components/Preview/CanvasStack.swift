@@ -13,7 +13,6 @@ struct CanvasStack: View {
     @Binding var showSourceDialog: Bool
 
     let focus: FocusState<UUID?>.Binding
-    let bottomChromeHeight: CGFloat
     let baseImage: UIImage?
 
     @State private var scale: CGFloat = 1

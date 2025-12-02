@@ -20,17 +20,33 @@ final class LoginViewModel: ObservableObject {
     ) {
         self.authService        = authService
         self.googleCoordinator  = googleCoordinator
+        
+        setupBindings()
 
+    }
+    
+    private func setupBindings() {
         Publishers.CombineLatest($email, $password)
             .map { email, pass in
                 EmailValidator.isValid(email) && pass.count >= 6
             }
+            .removeDuplicates()
             .assign(to: &$canSignIn)
+        
+        Publishers.Merge(
+            $email.map { _ in () },
+            $password.map { _ in () }
+        )
+        .sink { [weak self] _ in
+            self?.error = nil
+        }
+        .store(in: &cancellables)
     }
 
     func login() async {
         guard canSignIn else { return }
-        isLoading = true; defer { isLoading = false }
+        isLoading = true
+        defer { isLoading = false }
 
         do {
             let cleanEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -42,13 +58,16 @@ final class LoginViewModel: ObservableObject {
         }
     }
 
-    func loginWithGoogle(idToken: String, accessToken: String) async {
-        isLoading = true; defer { isLoading = false }
+    func loginWithGoogle() async {
+        isLoading = true
+        defer { isLoading = false }
 
         do {
+            let tokens = try await googleCoordinator.signIn()
+            
             _ = try await authService.signInWithGoogle(
-                idToken:     idToken,
-                accessToken: accessToken
+                idToken:     tokens.idToken,
+                accessToken: tokens.accessToken
             )
         }
         catch AuthError.popupClosedByUser {

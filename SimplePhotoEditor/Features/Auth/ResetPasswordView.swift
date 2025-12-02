@@ -30,7 +30,7 @@ struct ResetPasswordView: View {
 
             PrimaryActionButton(
                 title: String(localized: "auth.reset.send_link"),
-                enabled: vm.canReset
+                enabled: vm.canReset && !vm.isLoading
             ) {
                 Task { await vm.resetPassword() }
             }

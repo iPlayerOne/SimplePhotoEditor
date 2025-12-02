@@ -19,14 +19,14 @@ struct EditorTopBar: View {
                         Image(systemName: "rotate.right")
                             .toolbarGlyph(active: false)
                     }
-                    .glassEffect()
+                    .glassEffect(.clear)
                     .glassEffectUnion(id: "left", namespace: glassNS)
 
                     Button { isFlipped.toggle() } label: {
                         Image(systemName: "arrow.left.and.right.righttriangle.left.righttriangle.right")
                             .toolbarGlyph(active: false)
                     }
-                    .glassEffect()
+                    .glassEffect(.clear)
                     .glassEffectUnion(id: "left", namespace: glassNS)
                 }
                 .tint(.primary.opacity(0.9))
@@ -38,14 +38,14 @@ struct EditorTopBar: View {
                         Image(systemName: "scribble")
                             .toolbarGlyph(active: isDrawActive)
                     }
-                    .glassEffect()
+                    .glassEffect(.clear)
                     .glassEffectUnion(id: "right", namespace: glassNS)
 
                     Button(action: onTextTap) {
                         Image(systemName: "textformat")
                             .toolbarGlyph(active: isTextActive)
                     }
-                    .glassEffect()
+                    .glassEffect(.clear)
                     .glassEffectUnion(id: "right", namespace: glassNS)
                 }
                 .tint(.primary.opacity(0.9))

@@ -33,7 +33,7 @@ struct EditorNavigationBar: ToolbarContent {
                 Button(String(localized: "editor.export.share.png")) {
                     onShareFormat(.png)
                 }
-                Button(String(localized: "editor.export.share.png")) {
+                Button(String(localized: "editor.export.share.jpeg")) {
                     onShareFormat(.jpeg)
                 }
                 Button(String(localized: "common.cancel"), role: .cancel) { }

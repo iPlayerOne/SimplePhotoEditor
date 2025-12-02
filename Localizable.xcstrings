@@ -1143,6 +1143,17 @@
         }
       }
     },
+    "filters.name.none" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None"
+          }
+        }
+      }
+    },
     "Нажмите, чтобы добавить текст" : {
       "localizations" : {
         "en" : {

@@ -4,16 +4,14 @@ struct CanvasMetrics {
     let w: CGFloat
     let h: CGFloat
     let canvasSize: CGSize
-    
-    let containerH: CGFloat
     let containerSize: CGSize
     
     init(geo: GeometryProxy, baseImage: UIImage?, bottomChrome: CGFloat, heightRatio: CGFloat) {
             let scale = UIScreen.main.scale
             let containerW = snapToPixel(geo.size.width,              scale: scale)
-            let containerH = snapToPixel(geo.size.height * heightRatio, scale: scale)
+            let availableHeight = geo.size.height * heightRatio - bottomChrome
+            let containerH = snapToPixel(availableHeight, scale: scale)
 
-            self.containerH   = containerH
             self.containerSize = CGSize(width: containerW, height: containerH)
 
             if let img = baseImage, img.size.width > 0, img.size.height > 0 {

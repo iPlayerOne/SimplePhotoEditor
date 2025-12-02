@@ -1,5 +1,4 @@
 import SwiftUI
-import FirebaseCore
 
 @main
 struct SimplePhotoEditorApp: App {
@@ -9,7 +8,7 @@ struct SimplePhotoEditorApp: App {
     private let container: AppDependencyContainer
 
     init() {
-        FirebaseApp.configure()
+        AppConfig.setupFirebase()
         let authService = FirebaseAuthService()
         let sessionStore = SessionStore(authService: authService)
         _session = StateObject(wrappedValue: sessionStore)

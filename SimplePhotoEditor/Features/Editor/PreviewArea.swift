@@ -13,7 +13,7 @@ struct PreviewArea: View {
     let focus: FocusState<UUID?>.Binding
 
     var bottomChromeHeight: CGFloat = 0
-    private let heightRatio: CGFloat = 0.8
+    private let heightRatio: CGFloat = 0.95
 
     var body: some View {
         GeometryReader { geo in
@@ -37,7 +37,6 @@ struct PreviewArea: View {
                     isErasing: $isErasing,
                     showSourceDialog: $showSourceDialog,
                     focus: focus,
-                    bottomChromeHeight: bottomChromeHeight,
                     baseImage: displayImage
                 )
                 .onTapGesture {
@@ -57,6 +56,7 @@ struct PreviewArea: View {
             }
             .frame(width: geo.size.width, height: metrics.containerSize.height, alignment: .center)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+            .offset(y: -16)
             .clipped()
             .modifier(CanvasSync(
                 geo: geo,

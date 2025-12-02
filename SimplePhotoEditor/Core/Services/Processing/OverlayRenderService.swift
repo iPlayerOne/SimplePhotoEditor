@@ -1,7 +1,5 @@
 import UIKit
 import PencilKit
-import UniformTypeIdentifiers
-import ImageIO
 
 protocol OverlayRenderService {
     func apply(drawing: PKDrawing?, texts: [TextItem]?, to data: Data, canvasSize: CGSize, imageSize: CGSize) throws -> Data
@@ -93,17 +91,11 @@ final class OverlayRenderServiceImpl: OverlayRenderService {
 
 private struct CanvasMapping {
     let canvasSize: CGSize
-    let imageSize: CGSize
-    let baseSize: CGSize
-    
     let rectOnCanvas: CGRect
     let scaleToImage: CGFloat
     
     init(canvasSize: CGSize, imageSize: CGSize, baseSize: CGSize) {
         self.canvasSize = canvasSize
-        self.imageSize = imageSize
-        self.baseSize = baseSize
-        
         let imgAspect = imageSize.width / max(imageSize.height, 0.0001)
         let canvasAspect = canvasSize.width / max(canvasSize.height, 0.0001)
         

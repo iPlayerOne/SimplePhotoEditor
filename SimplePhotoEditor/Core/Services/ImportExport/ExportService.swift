@@ -7,13 +7,11 @@ enum ExportFormat {
 }
 
 enum ExportError: Error {
-    case permissionDenied
     case writeFailed
     case encodeFailed
 }
 protocol ExportService {
     func makeShareURL(from data: Data, format: ExportFormat) throws -> URL
-    func saveToPhotos(_ data: Data) async throws
 }
 
 
@@ -51,21 +49,4 @@ final class ExportServiceImpl: ExportService {
         }
     }
 
-    func saveToPhotos(_ data: Data) async throws {
-        guard try await requestAddOnlyPermission() else {
-            throw ExportError.permissionDenied
-        }
-        
-        try await PHPhotoLibrary.shared().performChanges {
-            PHAssetCreationRequest.forAsset()
-                .addResource(with: .photo, data: data, options: nil)
-        }
-    }
-
-    private func requestAddOnlyPermission() async throws -> Bool {
-        let status = PHPhotoLibrary.authorizationStatus(for: .addOnly)
-        if status == .authorized { return true }
-        let next = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
-        return next == .authorized
-    }
 }

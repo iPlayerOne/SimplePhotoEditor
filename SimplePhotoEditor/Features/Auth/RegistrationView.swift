@@ -50,7 +50,7 @@ struct RegistrationView: View {
 
             AuthTextField(
                 placeholder: String(localized: "auth.password.repeat.placeholder"),
-                text: $vm.repeatPassword,
+                text: $vm.confirmPassword,
                 isSecure: true,
                 textContentType: .newPassword,
                 isFocused: $repeatFocused
@@ -60,12 +60,12 @@ struct RegistrationView: View {
             }
             .validationMessage(
                 String(localized: "auth.validation.password.mismatch"),
-                visible: repeatVisited && !repeatFocused && !vm.repeatPassword.isEmpty && vm.password != vm.repeatPassword
+                visible: repeatVisited && !repeatFocused && !vm.confirmPassword.isEmpty && vm.password != vm.confirmPassword
             )
 
             PrimaryActionButton(
                 title: String(localized: "auth.registration.button"),
-                enabled: vm.canRegister
+                enabled: vm.canRegister && !vm.isLoading
             ) {
                 Task { await vm.register() }
             }

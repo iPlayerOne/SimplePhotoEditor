@@ -6,9 +6,8 @@ struct Filter: Identifiable, Equatable {
     let filterName: String
 
     static var none: Filter {
-        Filter(id: UUID(), name: "Нет", filterName: "")
+        Filter(id: UUID(), name: String(localized: "filters.name.none"), filterName: "")
     }
-    var isNone: Bool { filterName.isEmpty }
 
     init(id: UUID = UUID(), name: String, filterName: String) {
         self.id = id

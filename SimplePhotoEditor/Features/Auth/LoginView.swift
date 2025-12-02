@@ -2,25 +2,25 @@ import SwiftUI
 import GoogleSignInSwift
 
 struct LoginView: View {
-    @EnvironmentObject private var authRouter: AuthRouter
     @StateObject private var vm: LoginViewModel
-    let googleCoordinator: GoogleSignInCoordinator
+    
     @State private var showReset = false
-    private let makeResetVM: () -> ResetPasswordViewModel
-    let onSuccess: () -> Void
-    @FocusState private var emailFocused: Bool
-    @FocusState private var passwordFocused: Bool
     @State private var emailVisited = false
     @State private var passwordVisited = false
     
+    @FocusState private var emailFocused: Bool
+    @FocusState private var passwordFocused: Bool
+    
+    @EnvironmentObject private var authRouter: AuthRouter
+    private let makeResetVM: () -> ResetPasswordViewModel
+    let onSuccess: () -> Void
+    
     init(
         vm: LoginViewModel,
-        googleCoordinator: GoogleSignInCoordinator,
         onSuccess: @escaping () -> Void,
         resetVMFactory: @escaping () -> ResetPasswordViewModel
     ) {
         _vm = StateObject(wrappedValue: vm)
-        self.googleCoordinator = googleCoordinator
         self.onSuccess = onSuccess
         self.makeResetVM = resetVMFactory
     }
@@ -80,7 +80,7 @@ struct LoginView: View {
             VStack(spacing: 16) {
                 PrimaryActionButton(
                     title: String(localized: "auth.login.signin"),
-                    enabled: vm.canSignIn
+                    enabled: vm.canSignIn && !vm.isLoading
                 ) {
                     Task {
                         await vm.login()
@@ -92,24 +92,14 @@ struct LoginView: View {
                 
                 GoogleSignInButton(style: .wide) {
                     Task {
-                        do {
-                            let (idToken, accessToken) = try await
-                            googleCoordinator.signIn()
-                            await vm.loginWithGoogle(
-                                idToken:     idToken,
-                                accessToken: accessToken
-                            )
+                            await vm.loginWithGoogle()
                             if vm.error == nil {
                                 onSuccess()
                             }
-                        } catch {
-                            
-                        }
                     }
                 }
                 .frame(height: 44)
                 .disabled(vm.isLoading)
-                .accessibilityLabel(Text(String(localized: "auth.login.google_button")))
             }
             
             if vm.isLoading {

@@ -10,6 +10,7 @@ final class AppDependencyContainer {
     private let exportService    = ExportServiceImpl()
     
     let cameraAccessService: CameraAccess = CameraAccessService()
+    let imageImportService: ImageImportService = ImageImportServiceImpl()
 
     private lazy var imagePipeline: ImagePipeline = {
         ImagePipelineImpl(
@@ -51,7 +52,8 @@ final class AppDependencyContainer {
         EditorViewModel(
             pipeline: imagePipeline,
             exportService: exportService,
-            textVM: makeTextOverlayViewModel()
+            textVM: makeTextOverlayViewModel(),
+            imageImportService: imageImportService
         )
     }
 

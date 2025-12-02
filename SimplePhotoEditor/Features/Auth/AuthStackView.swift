@@ -17,7 +17,6 @@ struct AuthStackView: View {
         NavigationStack(path: $authRouter.path) {
             LoginView(
                 vm: container.makeLoginViewModel(),
-                googleCoordinator: container.googleCoordinator,
                 onSuccess: onLogin,
                 resetVMFactory: { container.makeResetPasswordViewModel() }
             )

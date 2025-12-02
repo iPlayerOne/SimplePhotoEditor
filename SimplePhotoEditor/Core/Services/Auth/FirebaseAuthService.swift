@@ -13,7 +13,9 @@ protocol AuthService {
 final class FirebaseAuthService: AuthService {
     private let subject: CurrentValueSubject<User?, Never>
     var authStatePublisher: AnyPublisher<User?, Never> {
-        subject.eraseToAnyPublisher()
+        subject
+            .receive(on: DispatchQueue.main) // гарантируем доставку обновлений в UI на main
+            .eraseToAnyPublisher()
     }
     
     private var authStateHandle: AuthStateDidChangeListenerHandle?
@@ -63,19 +65,21 @@ final class FirebaseAuthService: AuthService {
             let ns = error as NSError
             if let code = AuthErrorCode(rawValue: ns.code) {
                 switch code {
-                    case .wrongPassword:
-                        throw AuthError.wrongPassword
-                    case .userNotFound:
-                        throw AuthError.userNotFound
-                    case .userDisabled:
-                        throw AuthError.userDisabled
-                    case .networkError:
-                        throw AuthError.networkError(underlying: ns)
-                    default:
-                        throw AuthError.networkError(underlying: ns)
+                case .wrongPassword:
+                    throw AuthError.wrongPassword
+                case .userNotFound:
+                    throw AuthError.userNotFound
+                case .userDisabled:
+                    throw AuthError.userDisabled
+                case .networkError:
+                    throw AuthError.networkError(underlying: ns)
+                case .operationNotAllowed:
+                    throw AuthError.operationNotAllowed
+                default:
+                    throw AuthError.unknown
                 }
             }
-            throw AuthError.networkError(underlying: ns)
+            throw AuthError.unknown
         }
     }
     
@@ -83,6 +87,7 @@ final class FirebaseAuthService: AuthService {
         do {
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
             try await result.user.sendEmailVerification()
+            try? Auth.auth().signOut()
             guard let mail = result.user.email else {
                 throw AuthError.unknown
             }
@@ -91,19 +96,21 @@ final class FirebaseAuthService: AuthService {
             let ns = error as NSError
             if let code = AuthErrorCode(rawValue: ns.code) {
                 switch code {
-                    case .emailAlreadyInUse:
-                        throw AuthError.emailAlreadyInUse
-                    case .invalidEmail:
-                        throw AuthError.invalidEmailFormat
-                    case .weakPassword:
-                        throw AuthError.weakPassword
-                    case .operationNotAllowed:
-                        throw AuthError.operationNotAllowed
-                    default:
-                        throw AuthError.networkError(underlying: ns)
+                case .emailAlreadyInUse:
+                    throw AuthError.emailAlreadyInUse
+                case .invalidEmail:
+                    throw AuthError.invalidEmailFormat
+                case .weakPassword:
+                    throw AuthError.weakPassword
+                case .operationNotAllowed:
+                    throw AuthError.operationNotAllowed
+                case .networkError:
+                    throw AuthError.networkError(underlying: ns)
+                default:
+                    throw AuthError.unknown
                 }
             }
-            throw AuthError.networkError(underlying: ns)
+            throw AuthError.unknown
         }
     }
     
@@ -114,19 +121,20 @@ final class FirebaseAuthService: AuthService {
             let ns = error as NSError
             if let code = AuthErrorCode(rawValue: ns.code) {
                 switch code {
-                    case .invalidEmail:
-                        throw AuthError.invalidEmailFormat
-                    case .userNotFound:
-                        return
-                    case .tooManyRequests:
-                        throw AuthError.tooManyRequests
-                    case .networkError:
-                        throw AuthError.networkError(underlying: ns)
-                    default:
-                        throw AuthError.networkError(underlying: ns)
+                case .invalidEmail:
+                    throw AuthError.invalidEmailFormat
+                case .userNotFound:
+                    // тихо игнорируем
+                    return
+                case .tooManyRequests:
+                    throw AuthError.tooManyRequests
+                case .networkError:
+                    throw AuthError.networkError(underlying: ns)
+                default:
+                    throw AuthError.unknown
                 }
             }
-            throw AuthError.networkError(underlying: ns)
+            throw AuthError.unknown
         }
     }
     

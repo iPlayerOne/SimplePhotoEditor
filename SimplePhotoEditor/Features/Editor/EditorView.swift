@@ -14,18 +14,18 @@ struct EditorView: View {
     @FocusState private var focusedItemID: UUID?
     @State private var imageSelectionToken = UUID()
     private let panelH: CGFloat = 96
-
+    
     private let cameraAccess: CameraAccess
     let filters = FilterProviderImpl().allFilters()
     let onLogout: () -> Void
     @State private var isSourceSheetPresented = false
     @State private var armCamera: Bool = false
     @State private var armLibrary: Bool = false
-
+    
     @State private var isCameraPresented: Bool = false
     @State private var isLibraryPresented: Bool = false
     @State private var showNoAccessAlert: Bool = false
-
+    
     init(
         vm: EditorViewModel,
         cameraAccess: CameraAccess,
@@ -35,13 +35,13 @@ struct EditorView: View {
         self.cameraAccess = cameraAccess
         self.onLogout = onLogout
     }
-
+    
     var body: some View {
         ZStack {
             canvasArea
                 .id(imageSelectionToken)
                 .ignoresSafeArea(.keyboard, edges: .bottom)
-
+            
             bottomTools
                 .zIndex(2)
         }
@@ -80,12 +80,12 @@ struct EditorView: View {
                     Task { @MainActor in
                         let result = await cameraAccess.authorizeIfNeeded()
                         switch result {
-                        case .granted:
-                            armCamera = true
-                            isSourceSheetPresented = false
-                        case .denied, .unavailable:
-                            isSourceSheetPresented = false
-                            showNoAccessAlert = true
+                            case .granted:
+                                armCamera = true
+                                isSourceSheetPresented = false
+                            case .denied, .unavailable:
+                                isSourceSheetPresented = false
+                                showNoAccessAlert = true
                         }
                     }
                 },
@@ -96,6 +96,11 @@ struct EditorView: View {
                 onDismiss: { isSourceSheetPresented = false }
             )
             .presentationDragIndicator(.hidden)
+        }
+        .sheet(item: $vm.shareItem, onDismiss: {
+            vm.clearShareItem()
+        }) { item in
+            ShareSheet(items: [item.image])
         }
         .alert(
             String(localized: "editor.no_access_camera.title"),
@@ -117,10 +122,8 @@ struct EditorView: View {
         }
         .onChange(of: vm.originalImage) { _, image in
             focusedItemID = nil
-            vm.textVM.finishEditing()
-            vm.selectedFilter = nil
             drawing = PKDrawing()
-            vm.textVM.reset()
+            vm.resetForNewImage()
             previewCache.preparePreviews(for: image, filters: filters)
             imageSelectionToken = UUID()
         }
@@ -140,7 +143,7 @@ extension EditorView {
             )
         }
     }
-
+    
     @ViewBuilder private var canvasArea: some View {
         PreviewArea(
             vm:        vm,
@@ -160,40 +163,40 @@ extension EditorView {
             .safeAreaInset(edge: .bottom) {
                 Group {
                     switch vm.mode {
-                    case .draw, .filters:
-                        ToolsPanel(
-                            mode: vm.mode,
-                            hasImage: vm.originalImage != nil,
-                            filters: filters,
-                            selectedFilter: $vm.selectedFilter,
-                            cache: previewCache,
-                            drawing: $drawing,
-                            tool: $tool,
-                            isErasing: $isErasing
-                        )
-                        .padding(.horizontal, 12)
-
-                    case .text:
-                        if vm.keyboardHeight > 0,
-                           vm.textVM.activeID != nil,
-                           vm.textVM.items.first(where: { $0.id == vm.textVM.activeID })?.isEditing == true
-                        {
-                            TextToolsToolbar(
-                                vm: vm.textVM,
-                                onDone: {
-                                    vm.textVM.finishEditing()
-                                    focusedItemID = nil
-                                }
+                        case .draw, .filters:
+                            ToolsPanel(
+                                mode: vm.mode,
+                                hasImage: vm.originalImage != nil,
+                                filters: filters,
+                                selectedFilter: $vm.selectedFilter,
+                                cache: previewCache,
+                                drawing: $drawing,
+                                tool: $tool,
+                                isErasing: $isErasing
                             )
-                            .transition(.move(edge: .bottom).combined(with: .opacity))
-                        }
+                            .padding(.horizontal, 12)
+                            
+                        case .text:
+                            if vm.keyboardHeight > 0,
+                               vm.textVM.activeID != nil,
+                               vm.textVM.items.first(where: { $0.id == vm.textVM.activeID })?.isEditing == true
+                            {
+                                TextToolsToolbar(
+                                    vm: vm.textVM,
+                                    onDone: {
+                                        vm.textVM.finishEditing()
+                                        focusedItemID = nil
+                                    }
+                                )
+                                .transition(.move(edge: .bottom).combined(with: .opacity))
+                            }
                     }
                 }
             }
             .animation(.snappy, value: vm.mode)
             .animation(.snappy, value: vm.keyboardHeight)
     }
-
+    
     @ToolbarContentBuilder private var navBar: some ToolbarContent {
         EditorNavigationBar(
             showSourceDialog: $isSourceSheetPresented,

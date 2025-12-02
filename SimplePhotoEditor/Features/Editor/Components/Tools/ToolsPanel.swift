@@ -32,7 +32,7 @@ struct ToolsPanel: View {
             .frame(height: panelHeight)
             .clipShape(panelShape)
             .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: -2)
-            .glassEffect()
+            .glassEffect(.clear)
     }
 
     @ViewBuilder

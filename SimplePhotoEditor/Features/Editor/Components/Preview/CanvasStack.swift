@@ -31,7 +31,9 @@ struct CanvasStack: View {
         }()
 
         let pinchGesture = MagnifyGesture()
-            .updating($pinch) { value, state, _ in state = value.magnification }
+            .updating($pinch) { value, state, _ in
+                state = value.magnification
+            }
             .onEnded { value in
                 scale *= value.magnification
             }
@@ -39,40 +41,46 @@ struct CanvasStack: View {
         let zoom = extraScale * scale * pinch
 
         ZStack {
-            PhotoLayer(
-                image: baseImage,
-                maxSize: maxSize,
-                onAddImage: { vm.originalImage == nil ? (showSourceDialog = true) : () },
-                contentMode: .fit
-            )
+            ZStack {
+                PhotoLayer(
+                    image: baseImage,
+                    maxSize: maxSize,
+                    onAddImage: { vm.originalImage == nil ? (showSourceDialog = true) : () },
+                    contentMode: .fit
+                )
 
-            if baseImage != nil {
-                PencilCanvasView(drawing: $drawing, tool: tool, isErasing: isErasing)
-                    .frame(width: maxSize.width, height: maxSize.height)
-                    .allowsHitTesting(vm.mode == .draw)
+                if baseImage != nil {
+                    PencilCanvasView(drawing: $drawing, tool: tool, isErasing: isErasing)
+                        .frame(width: maxSize.width, height: maxSize.height)
+                        .allowsHitTesting(vm.mode == .draw)
 
-                TextOverlayLayer(textVM: textVM, focus: focus)
-                    .frame(width: maxSize.width, height: maxSize.height)
+                    TextOverlayLayer(textVM: textVM, focus: focus)
+                        .frame(width: maxSize.width, height: maxSize.height)
+                }
             }
+            .frame(width: maxSize.width, height: maxSize.height)
+            .contentShape(Rectangle())
+            .canvasTransform(
+                quarterTurns: vm.rotationCount,
+                flippedHorizontally: vm.isFlippedHorizontally,
+                frameSize: metrics.canvasSize
+            )
+            .scaleEffect(zoom)
+            .simultaneousGesture(pinchGesture)
 
             if vm.mode == .text && textVM.isPlacing && textVM.items.isEmpty {
-                Color.black.opacity(0.4).frame(width: maxSize.width, height: maxSize.height)
-                Text("Нажмите, чтобы добавить текст")
+                Color.black.opacity(0.4)
+                    .frame(width: maxSize.width, height: maxSize.height)
+                    .allowsHitTesting(false)
+
+                Text(String(localized: "editor.text.tap_to_add"))
                     .font(.headline)
                     .foregroundColor(.white)
                     .padding()
                     .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8))
                     .frame(width: maxSize.width, height: maxSize.height, alignment: .center)
+                    .allowsHitTesting(false)
             }
         }
-        .frame(width: maxSize.width, height: maxSize.height)
-        .contentShape(Rectangle())
-        .canvasTransform(
-            quarterTurns: vm.rotationCount,
-            flippedHorizontally: vm.isFlippedHorizontally,
-            frameSize: metrics.canvasSize
-        )
-        .scaleEffect(zoom)
-        .simultaneousGesture(pinchGesture)
     }
 }

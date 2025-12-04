@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 
 struct ValidationMessageModifier: ViewModifier {
     let message: String
@@ -7,26 +6,17 @@ struct ValidationMessageModifier: ViewModifier {
     let color: Color
     let spacing: CGFloat
 
-    private var lineHeight: CGFloat {
-        UIFont.preferredFont(forTextStyle: .footnote).lineHeight
-    }
-
     func body(content: Content) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: spacing) {
             content
 
-            ZStack(alignment: .leading) {
-                Text(message)
-                    .font(.footnote)
-                    .foregroundStyle(color)
-                    .opacity(visible ? 1 : 0)
-                    .accessibilityHidden(!visible)
-                    .allowsHitTesting(false)
-            }
-            .frame(height: lineHeight)
+            Text(message)
+                .font(.footnote)
+                .foregroundStyle(color)
+                .opacity(visible ? 1 : 0)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(height: 18) // фиксированная высота под сообщение
         }
-        .padding(.bottom, spacing)
-        .animation(.default, value: visible)
     }
 }
 

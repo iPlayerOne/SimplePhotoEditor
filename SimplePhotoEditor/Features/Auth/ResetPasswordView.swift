@@ -17,15 +17,22 @@ struct ResetPasswordView: View {
                 placeholder: String(localized: "auth.email.placeholder"),
                 text: $vm.email,
                 keyboard: .emailAddress,
-                textContentType: .emailAddress,
-                isFocused: $emailFocused
+                textContentType: .emailAddress
             )
-            .onChange(of: emailFocused) {
-                if !emailFocused { emailVisited = true }
+            .focused($emailFocused)
+            .onChange(of: emailFocused) { isFocused in
+                if !isFocused {
+                    withAnimation(.none) {
+                        emailVisited = true
+                    }
+                }
             }
             .validationMessage(
                 String(localized: "auth.validation.email.invalid"),
-                visible: emailVisited && !emailFocused && !vm.email.isEmpty && !EmailValidator.isValid(vm.email)
+                visible: emailVisited
+                    && !emailFocused
+                    && !vm.email.isEmpty
+                    && !EmailValidator.isValid(vm.email)
             )
 
             PrimaryActionButton(
@@ -43,6 +50,8 @@ struct ResetPasswordView: View {
             Spacer()
         }
         .padding(24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         .navigationTitle(String(localized: "auth.reset.title"))
         .navigationBarTitleDisplayMode(.inline)
         .alertLocalizedError($vm.error, title: String(localized: "common.error"))

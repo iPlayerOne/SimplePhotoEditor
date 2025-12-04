@@ -22,50 +22,60 @@ struct RegistrationView: View {
                 placeholder: String(localized: "auth.email.placeholder"),
                 text: $vm.email,
                 keyboard: .emailAddress,
-                textContentType: .emailAddress,
-                isFocused: $emailFocused
+                textContentType: .emailAddress
             )
-            .onChange(of: emailFocused) {
-                if !emailFocused { emailVisited = true }
+            .focused($emailFocused)
+            .onChange(of: emailFocused) { isFocused in
+                if !isFocused { emailVisited = true }
             }
             .validationMessage(
                 String(localized: "auth.validation.email.invalid"),
-                visible: emailVisited && !emailFocused && !vm.email.isEmpty && !EmailValidator.isValid(vm.email)
+                visible: emailVisited
+                    && !emailFocused
+                    && !vm.email.isEmpty
+                    && !EmailValidator.isValid(vm.email)
             )
 
             AuthTextField(
                 placeholder: String(localized: "auth.password.placeholder"),
                 text: $vm.password,
                 isSecure: true,
-                textContentType: .newPassword,
-                isFocused: $passwordFocused
+                textContentType: .newPassword
             )
-            .onChange(of: passwordFocused) {
-                if !passwordFocused { passwordVisited = true }
+            .focused($passwordFocused)
+            .onChange(of: passwordFocused) { isFocused in
+                if !isFocused { passwordVisited = true }
             }
             .validationMessage(
                 String(localized: "auth.validation.password.short"),
-                visible: passwordVisited && !passwordFocused && !vm.password.isEmpty && vm.password.count < 6
+                visible: passwordVisited
+                    && !passwordFocused
+                    && !vm.password.isEmpty
+                    && vm.password.count < 6
             )
 
+            // REPEAT PASSWORD
             AuthTextField(
                 placeholder: String(localized: "auth.password.repeat.placeholder"),
                 text: $vm.confirmPassword,
                 isSecure: true,
-                textContentType: .newPassword,
-                isFocused: $repeatFocused
+                textContentType: .newPassword
             )
-            .onChange(of: repeatFocused) {
-                if !repeatFocused { repeatVisited = true }
+            .focused($repeatFocused)
+            .onChange(of: repeatFocused) { isFocused in
+                if !isFocused { repeatVisited = true }
             }
             .validationMessage(
                 String(localized: "auth.validation.password.mismatch"),
-                visible: repeatVisited && !repeatFocused && !vm.confirmPassword.isEmpty && vm.password != vm.confirmPassword
+                visible: repeatVisited
+                    && !repeatFocused
+                    && !vm.confirmPassword.isEmpty
+                    && vm.password != vm.confirmPassword
             )
 
             PrimaryActionButton(
                 title: String(localized: "auth.registration.button"),
-                enabled: vm.canRegister && !vm.isLoading
+                enabled: vm.canRegister
             ) {
                 Task { await vm.register() }
             }
@@ -78,6 +88,8 @@ struct RegistrationView: View {
             Spacer()
         }
         .padding(24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         .navigationTitle(String(localized: "auth.registration.title"))
         .navigationBarTitleDisplayMode(.inline)
         .alertLocalizedError($vm.error, title: String(localized: "auth.registration.error.title"))

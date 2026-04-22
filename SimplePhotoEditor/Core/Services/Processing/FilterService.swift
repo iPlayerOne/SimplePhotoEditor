@@ -8,10 +8,25 @@ protocol FilterService {
 enum FilterError: Error { case invalidData, renderFailed }
 
 final class FilterServiceImpl: FilterService {
-    
+
     func apply(filterName: String, to data: Data, downscaleFactor: CGFloat = 1.0) throws -> Data {
-        
-        guard var ci = CIImage(data: data) else { throw FilterError.invalidData }
+        try apply(filterName: filterName, to: data, downscaleFactor: downscaleFactor, context: CIContextPool.final)
+    }
+
+    func applyPreview(filterName: String, to data: Data, downscaleFactor: CGFloat = 1.0) throws -> Data {
+        try apply(filterName: filterName, to: data, downscaleFactor: downscaleFactor, context: CIContextPool.preview)
+    }
+
+    private func apply(
+        filterName: String,
+        to data: Data,
+        downscaleFactor: CGFloat,
+        context: CIContext
+    ) throws -> Data {
+
+        guard var ci = CIImage(data: data, options: [.applyOrientationProperty: true]) else {
+            throw FilterError.invalidData
+        }
 
         ci = CIHelpers.lanczosScaled(ci, scale: downscaleFactor)
 
@@ -26,12 +41,14 @@ final class FilterServiceImpl: FilterService {
         }
 
         let rect = ci.extent.integral
-        guard let cg = CIContextPool.shared.createCGImage(ci, from: rect) else {
+        guard let cg = context.createCGImage(ci, from: rect) else {
             throw FilterError.renderFailed
         }
+
         guard let jpeg = UIImage(cgImage: cg).jpegData(compressionQuality: 0.9) else {
             throw FilterError.renderFailed
         }
+
         return jpeg
     }
 }

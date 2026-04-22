@@ -4,7 +4,7 @@ import SwiftUI
 private func rotationFitScale(for frame: CGSize, quarterTurns: Int) -> CGFloat {
     guard quarterTurns % 2 != 0, frame.width > 0, frame.height > 0 else { return 1 }
     let r = frame.width / frame.height
-    return min(r, 1 / r) // ≤ 1
+    return min(r, 1 / r)
 }
 
 public extension View {

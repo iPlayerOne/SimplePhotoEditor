@@ -14,11 +14,8 @@ final class OverlayRenderServiceImpl: OverlayRenderService {
     
     func apply(drawing: PKDrawing?, texts: [TextItem]?, to data: Data, canvasSize: CGSize, imageSize: CGSize) throws -> Data {
         let base = try decodeBaseImage(from: data)
-        
         let mapping = CanvasMapping(canvasSize: canvasSize, imageSize: imageSize, baseSize: base.size)
-        
         let rendered = render(base: base, drawing: drawing, texts: texts, mapping: mapping)
-        
         return try encodeJPEG(rendered, quality: 0.9)
     }
     
@@ -45,7 +42,6 @@ final class OverlayRenderServiceImpl: OverlayRenderService {
         
         return renderer.image { ctx in
             drawBase(base, in: ctx)
-            
             if let drawing {
                 drawDrawing(drawing, in: ctx, mapping: mapping)
             }
@@ -83,8 +79,12 @@ final class OverlayRenderServiceImpl: OverlayRenderService {
             ]
             let ns = item.text as NSString
             let ts = ns.size(withAttributes: attrs)
-            let origin = CGPoint(x: pt.x - ts.width / 2, y: pt.y - ts.height / 2)
-            ns.draw(at: origin, withAttributes: attrs)
+
+            ctx.cgContext.saveGState()
+            ctx.cgContext.translateBy(x: pt.x, y: pt.y)
+            ctx.cgContext.rotate(by: CGFloat(item.rotation) * .pi / 180)
+            ns.draw(at: CGPoint(x: -ts.width / 2, y: -ts.height / 2), withAttributes: attrs)
+            ctx.cgContext.restoreGState()
         }
     }
 }

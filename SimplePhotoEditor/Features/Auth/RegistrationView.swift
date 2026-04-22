@@ -54,7 +54,6 @@ struct RegistrationView: View {
                     && vm.password.count < 6
             )
 
-            // REPEAT PASSWORD
             AuthTextField(
                 placeholder: String(localized: "auth.password.repeat.placeholder"),
                 text: $vm.confirmPassword,

@@ -2,30 +2,42 @@ import UIKit
 import ImageIO
 
 protocol ImageDecodeService {
-    func downsample(_ data: Data, maxDimension: CGFloat, _ scale: CGFloat)-> UIImage?
+    func downsample(_ data: Data, maxDimension: CGFloat, _ scale: CGFloat) -> UIImage?
+    func downsampleCGImage(_ data: Data, maxPixelSize: Int) -> CGImage?
 }
 
 final class ImageDecodeServiceImpl: ImageDecodeService {
+
     func downsample(_ data: Data, maxDimension: CGFloat, _ scale: CGFloat) -> UIImage? {
-        let srcOpts: CFDictionary = [ kCGImageSourceShouldCache: false] as CFDictionary
-        let raw = maxDimension * scale
-        let maxPixel = Int(raw.rounded(.down))
-        let evenMaxPixel = maxPixel & ~1
-        
+        let maxPixelSize = makeMaxPixelSize(maxDimension: maxDimension, scale: scale)
+        guard let cg = downsampleCGImage(data, maxPixelSize: maxPixelSize) else { return nil }
+        return UIImage(cgImage: cg, scale: scale, orientation: .up)
+    }
+
+    func downsampleCGImage(_ data: Data, maxPixelSize: Int) -> CGImage? {
+        let srcOpts: CFDictionary = [
+            kCGImageSourceShouldCache: false
+        ] as CFDictionary
+
         guard let src = CGImageSourceCreateWithData(data as CFData, srcOpts) else {
             return nil
         }
-        let downscaleOpts: CFDictionary = [
+
+        let evenMaxPixel = max(2, maxPixelSize & ~1)
+
+        let thumbOpts: CFDictionary = [
             kCGImageSourceCreateThumbnailFromImageAlways: true,
-            kCGImageSourceShouldCacheImmediately: true,
             kCGImageSourceCreateThumbnailWithTransform: true,
-            kCGImageSourceThumbnailMaxPixelSize: evenMaxPixel
+            kCGImageSourceThumbnailMaxPixelSize: evenMaxPixel,
+            kCGImageSourceShouldCacheImmediately: true
         ] as CFDictionary
-        guard let cg = CGImageSourceCreateThumbnailAtIndex(src, 0, downscaleOpts) else {
-            return nil
-        }
-        return UIImage(cgImage: cg, scale: scale, orientation: .up)
+
+        return CGImageSourceCreateThumbnailAtIndex(src, 0, thumbOpts)
     }
-    
-    
+
+    private func makeMaxPixelSize(maxDimension: CGFloat, scale: CGFloat) -> Int {
+        let raw = maxDimension * max(1, scale)
+        let maxPixel = Int(raw.rounded(.down))
+        return max(2, maxPixel)
+    }
 }

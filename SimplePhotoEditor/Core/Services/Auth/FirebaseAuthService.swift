@@ -14,7 +14,7 @@ final class FirebaseAuthService: AuthService {
     private let subject: CurrentValueSubject<User?, Never>
     var authStatePublisher: AnyPublisher<User?, Never> {
         subject
-            .receive(on: DispatchQueue.main) // гарантируем доставку обновлений в UI на main
+            .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
     }
     
@@ -124,7 +124,6 @@ final class FirebaseAuthService: AuthService {
                 case .invalidEmail:
                     throw AuthError.invalidEmailFormat
                 case .userNotFound:
-                    // тихо игнорируем
                     return
                 case .tooManyRequests:
                     throw AuthError.tooManyRequests

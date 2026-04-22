@@ -12,13 +12,16 @@ final class TextItem: Identifiable {
     var position: CGPoint
     var isEditing: Bool
 
+    var rotation: Double
+
     init(
         text: String,
         font: FontOption,
         fontSize: Double,
         color: Color,
         position: CGPoint,
-        isEditing: Bool = false
+        isEditing: Bool = false,
+        rotation: Double = 0
     ) {
         self.text = text
         self.font = font
@@ -26,5 +29,6 @@ final class TextItem: Identifiable {
         self.color = color
         self.position = position
         self.isEditing = isEditing
+        self.rotation = rotation
     }
 }

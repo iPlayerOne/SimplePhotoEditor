@@ -1,18 +1,17 @@
+import UIKit
 import SwiftUI
 import Combine
 import PencilKit
 import PhotosUI
-import UIKit
-
 
 @MainActor
 final class EditorViewModel: ObservableObject {
     @Published var mode: EditorMode = .filters
     @Published var inputData: Data?
-    @Published private(set) var previewImage: UIImage? = nil
-    @Published private(set) var originalImage: UIImage? = nil
+    @Published private(set) var previewImage: UIImage?
+    @Published private(set) var originalImage: UIImage?
 
-    @Published var selectedFilter: Filter? = nil
+    @Published var selectedFilter: Filter?
     @Published var rotationCount: Int = 0
     @Published var isFlippedHorizontally: Bool = false
 
@@ -23,12 +22,19 @@ final class EditorViewModel: ObservableObject {
     @Published var exportFormat: ExportFormat = .png
     @Published var libraryItem: PhotosPickerItem?
 
-    private var pipeline: ImagePipeline
+    var canTransformImage: Bool {
+        originalImage != nil && mode == .filters
+    }
+
+    private let pipeline: ImagePipeline
     private let exportService: ExportService
     private let imageImportService: ImageImportService
     let textVM: TextOverlayViewModel
 
     private var cancellables = Set<AnyCancellable>()
+
+    private var previewTask: Task<Void, Never>?
+    private var previewGen = UUID()
 
     init(
         pipeline: ImagePipeline,
@@ -45,22 +51,30 @@ final class EditorViewModel: ObservableObject {
             .CombineLatest($inputData, $selectedFilter)
             .debounce(for: .milliseconds(120), scheduler: RunLoop.main)
             .sink { [weak self] raw, fx in
-                guard let self = self else { return }
-                Task {
-                    await self.updatePreview(raw: raw, filter: fx)
+                guard let self else { return }
+
+                self.previewTask?.cancel()
+
+                let gen = UUID()
+                self.previewGen = gen
+
+                self.previewTask = Task(priority: .userInitiated) { [weak self] in
+                    guard let self else { return }
+                    await self.updatePreview(raw: raw, filter: fx, gen: gen)
                 }
             }
             .store(in: &cancellables)
 
         $inputData
             .sink { [weak self] data in
-                guard let data = data else {
-                    self?.originalImage = nil
-                    return
-                }
-                self?.originalImage = UIImage(data: data)
+                guard let self else { return }
+                self.originalImage = data.flatMap(UIImage.init(data:))
             }
             .store(in: &cancellables)
+    }
+
+    deinit {
+        previewTask?.cancel()
     }
 
     func setMode(_ newMode: EditorMode) {
@@ -73,32 +87,23 @@ final class EditorViewModel: ObservableObject {
         setMode(mode == target ? .filters : target)
     }
 
-    func startDraw() {
-        toogleMode(.draw)
-    }
+    func startDraw() { toogleMode(.draw) }
+    func startText() { toogleMode(.text) }
 
-    func startText() {
-        toogleMode(.text)
-    }
-
-    func updateKeyboard(h: CGFloat) {
-        keyboardHeight = h
-    }
+    func updateKeyboard(h: CGFloat) { keyboardHeight = h }
 
     func share(drawingOverlay: PKDrawing?) {
-        Task {
+        Task { [weak self] in
+            guard let self else { return }
             do {
                 let item = try await makeShareItem(drawingOverlay: drawingOverlay)
-                shareItem = item
-            } catch {
-            }
+                self.shareItem = item
+            } catch { }
         }
     }
 
-    func clearShareItem() {
-        shareItem = nil
-    }
-    
+    func clearShareItem() { shareItem = nil }
+
     func resetForNewImage() {
         mode = .filters
         selectedFilter = nil
@@ -111,7 +116,12 @@ final class EditorViewModel: ObservableObject {
 
     private func applyMode(from old: EditorMode, to new: EditorMode) {
         if new == .text, old != .text {
-            textVM.enterPlacement()
+            if textVM.items.isEmpty {
+                textVM.beginPlacingNewText(rotationQuarterTurns: rotationCount)
+            } else {
+                textVM.finishEditing()
+                textVM.isPlacing = false
+            }
         }
 
         if old == .text, new != .text {
@@ -119,20 +129,22 @@ final class EditorViewModel: ObservableObject {
         }
     }
 
-    private func updatePreview(raw: Data?, filter: Filter?) async {
+    private func updatePreview(raw: Data?, filter: Filter?, gen: UUID) async {
         guard let data = raw else {
             previewImage = nil
             return
         }
 
-        let t0 = CFAbsoluteTimeGetCurrent()
-        previewImage = await pipeline.makePreview(
+        let ui = await pipeline.makePreview(
             from: data,
             filterName: filter?.filterName,
             downscaleFactor: 0.25
         )
 
-        let _ = CFAbsoluteTimeGetCurrent() - t0
+        if Task.isCancelled { return }
+        if gen != previewGen { return }
+
+        previewImage = ui
     }
 
     private func makeFinalImage(drawingOverlay: PKDrawing?) async throws -> Data {
@@ -153,7 +165,7 @@ final class EditorViewModel: ObservableObject {
 
     private func makeShareItem(drawingOverlay: PKDrawing?) async throws -> ShareItem {
         let data = try await makeFinalImage(drawingOverlay: drawingOverlay)
-        let _ = try exportService.makeShareURL(from: data, format: exportFormat)
+        _ = try exportService.makeShareURL(from: data, format: exportFormat)
         guard let ui = UIImage(data: data) else { throw OverlayRenderError.encodeFailed }
         return ShareItem(image: ui)
     }
@@ -165,23 +177,18 @@ final class EditorViewModel: ObservableObject {
 
     func handleLibrarySelectionIfNeeded() {
         guard let item = libraryItem else { return }
-        
+
         defer {
-            Task {
-                self.libraryItem = nil  
-            }
+            Task { [weak self] in self?.libraryItem = nil }
         }
-        
+
         Task { [weak self] in
             guard let self else { return }
             do {
                 if let data = try await imageImportService.loadData(from: item) {
-                    await MainActor.run { [weak self] in
-                        self?.inputData = data
-                    }
+                    self.inputData = data
                 }
-            } catch {
-            }
+            } catch { }
         }
     }
 }

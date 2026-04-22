@@ -29,16 +29,20 @@ final class ImagePipelineImpl: ImagePipeline {
     }
 
     func makePreview(from data: Data, filterName: String?, downscaleFactor: CGFloat) async -> UIImage? {
-        let decode = self.decode
-        let filter = self.filter
+        await Task(priority: .userInitiated) { [decode, filter] in
+            if Task.isCancelled { return nil }
 
-        return await Task.detached(priority: .userInitiated) {
-            guard let preview = await decode.downsample(data, maxDimension: 600, UIScreen.main.scale) else {
+            let scale = UIScreen.main.scale
+            guard let preview = decode.downsample(data, maxDimension: 600, scale) else {
                 return nil
             }
+
             guard let name = filterName, !name.isEmpty else {
                 return preview
             }
+
+            if Task.isCancelled { return nil }
+
             guard
                 let jpeg = preview.jpegData(compressionQuality: 0.9),
                 let filteredData = try? filter.apply(filterName: name, to: jpeg, downscaleFactor: downscaleFactor),
@@ -46,6 +50,7 @@ final class ImagePipelineImpl: ImagePipeline {
             else {
                 return preview
             }
+
             return filteredPreview
         }.value
     }
@@ -60,11 +65,7 @@ final class ImagePipelineImpl: ImagePipeline {
         canvasSize: CGSize,
         imageSize: CGSize
     ) async throws -> Data {
-        let transform = self.transform
-        let filter = self.filter
-        let overlay = self.overlay
-
-        return try await Task.detached(priority: .userInitiated) {
+        try await Task(priority: .userInitiated) { [transform, filter, overlay] in
             var out = data
 
             if rotation != 0 {

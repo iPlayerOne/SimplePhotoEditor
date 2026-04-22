@@ -40,7 +40,21 @@ struct PreviewArea: View {
                     baseImage: displayImage
                 )
                 .onTapGesture {
-                    guard vm.mode == .text, textVM.isPlacing else { return }
+                    guard vm.mode == .text else { return }
+
+                    if focus.wrappedValue != nil {
+                        focus.wrappedValue = nil
+                        textVM.finishEditing()
+                        return
+                    }
+
+                    if textVM.activeID != nil {
+                        textVM.clearSelection()
+                        return
+                    }
+
+//                    guard textVM.isPlacing else { return }
+
                     let overlap = keyboardOverlap(
                         in: geo,
                         keyboardH: vm.keyboardHeight,
@@ -50,7 +64,8 @@ struct PreviewArea: View {
                     textVM.placeText(
                         in: metrics.canvasSize,
                         keyboardH: overlap,
-                        imageSize: (vm.previewImage ?? vm.originalImage)?.size
+                        imageSize: (vm.previewImage ?? vm.originalImage)?.size,
+                        rotationQuarterTurns: vm.rotationCount
                     )
                 }
             }

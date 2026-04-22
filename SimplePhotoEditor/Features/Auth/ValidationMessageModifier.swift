@@ -15,7 +15,7 @@ struct ValidationMessageModifier: ViewModifier {
                 .foregroundStyle(color)
                 .opacity(visible ? 1 : 0)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .frame(height: 18) // фиксированная высота под сообщение
+                .frame(height: 18)
         }
     }
 }

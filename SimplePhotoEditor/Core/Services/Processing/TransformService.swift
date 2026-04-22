@@ -13,7 +13,7 @@ enum TransformError: Error {
 
 
 final class TransformServiceImpl: TransformService {
-    private let ctx = CIContextPool.shared
+    private let ctx = CIContextPool.final
 
     func rotate90(data: Data, times: Int) throws -> Data {
         guard let ci0 = CIImage(data: data, options: [.applyOrientationProperty: true])

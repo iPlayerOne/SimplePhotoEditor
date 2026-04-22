@@ -25,7 +25,9 @@ final class AppDependencyContainer {
     let googleCoordinator: GoogleSignInCoordinator
 
     init(authService: AuthService = FirebaseAuthService()) {
-        _ = CIContextPool.shared
+        _ = CIContextPool.final
+        _ = CIContextPool.preview
+        
         self.authService = authService
         self.googleCoordinator = GoogleSignInCoordinatorImpl(
             clientID: AppConfig.googleClientID

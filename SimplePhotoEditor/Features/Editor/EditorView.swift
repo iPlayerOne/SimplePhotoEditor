@@ -117,14 +117,14 @@ struct EditorView: View {
         }
         .onReceive(keyboard.$height) { vm.updateKeyboard(h: $0) }
         .onChange(of: vm.mode) { old, new in
-            if new == .text, old != .text { vm.textVM.enterPlacement() }
+            if new == .text, old != .text { vm.textVM.enterPlacement(rotationQuarterTurns: vm.rotationCount) }
             if old == .text, new != .text { vm.textVM.finishEditing() }
         }
-        .onChange(of: vm.originalImage) { _, image in
+        .onChange(of: vm.inputData) { _, date in
             focusedItemID = nil
             drawing = PKDrawing()
             vm.resetForNewImage()
-            previewCache.preparePreviews(for: image, filters: filters)
+            previewCache.preparePreviews(for: date, filters: filters)
             imageSelectionToken = UUID()
         }
     }
@@ -139,7 +139,8 @@ extension EditorView {
                 onDrawTap: { vm.startDraw() },
                 onTextTap: { vm.startText() },
                 isDrawActive: vm.mode == .draw,
-                isTextActive: vm.mode == .text
+                isTextActive: vm.mode == .text,
+                canTransformImage: vm.canTransformImage
             )
         }
     }
@@ -151,7 +152,7 @@ extension EditorView {
             drawing:   $drawing,
             tool:      $tool,
             isErasing: $isErasing,
-            showSourceDialog: $isSourceSheetPresented, // локальный флаг показа шита
+            showSourceDialog: $isSourceSheetPresented,
             focus: $focusedItemID,
             bottomChromeHeight: panelH
         )
@@ -177,15 +178,13 @@ extension EditorView {
                             .padding(.horizontal, 12)
                             
                         case .text:
-                            if vm.keyboardHeight > 0,
-                               vm.textVM.activeID != nil,
-                               vm.textVM.items.first(where: { $0.id == vm.textVM.activeID })?.isEditing == true
-                            {
+                            if vm.textVM.activeID != nil {
                                 TextToolsToolbar(
                                     vm: vm.textVM,
                                     onDone: {
-                                        vm.textVM.finishEditing()
                                         focusedItemID = nil
+                                        vm.textVM.finishEditing()
+                                        vm.textVM.clearSelection()
                                     }
                                 )
                                 .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -209,3 +208,4 @@ extension EditorView {
         )
     }
 }
+

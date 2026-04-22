@@ -11,25 +11,29 @@ struct EditorTopBar: View {
     let isDrawActive: Bool
     let isTextActive: Bool
 
+    let canTransformImage: Bool
+
     var body: some View {
         GlassEffectContainer(spacing: 0) {
             HStack(spacing: 0) {
-                HStack(spacing: 0) {
-                    Button { rotationCount += 1 } label: {
-                        Image(systemName: "rotate.right")
-                            .toolbarGlyph(active: false)
-                    }
-                    .glassEffect(.clear)
-                    .glassEffectUnion(id: "left", namespace: glassNS)
+                if canTransformImage {
+                    HStack(spacing: 0) {
+                        Button { rotationCount += 1 } label: {
+                            Image(systemName: "rotate.right")
+                                .toolbarGlyph(active: false)
+                        }
+                        .glassEffect(.clear)
+                        .glassEffectUnion(id: "left", namespace: glassNS)
 
-                    Button { isFlipped.toggle() } label: {
-                        Image(systemName: "arrow.left.and.right.righttriangle.left.righttriangle.right")
-                            .toolbarGlyph(active: false)
+                        Button { isFlipped.toggle() } label: {
+                            Image(systemName: "arrow.left.and.right.righttriangle.left.righttriangle.right")
+                                .toolbarGlyph(active: false)
+                        }
+                        .glassEffect(.clear)
+                        .glassEffectUnion(id: "left", namespace: glassNS)
                     }
-                    .glassEffect(.clear)
-                    .glassEffectUnion(id: "left", namespace: glassNS)
+                    .tint(.primary.opacity(0.9))
                 }
-                .tint(.primary.opacity(0.9))
 
                 Spacer(minLength: 8)
 
@@ -50,10 +54,8 @@ struct EditorTopBar: View {
                 }
                 .tint(.primary.opacity(0.9))
             }
-            .padding(.vertical, 8)
-            .padding(.horizontal, 12) 
+            .padding(.horizontal, 12)
         }
-        .padding(.top, 8)
         .glassEffectID("topbar", in: glassNS)
     }
 }
@@ -72,8 +74,9 @@ struct EditorTopBar: View {
                         isFlipped: $isFlipped,
                         onDrawTap: { },
                         onTextTap: { },
-                        isDrawActive: true,
-                        isTextActive: false
+                        isDrawActive: false,
+                        isTextActive: false,
+                        canTransformImage: true
                     )
                     Spacer()
                 }

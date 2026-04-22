@@ -6,33 +6,59 @@ struct DrawToolsPanel: View {
     @Binding var isErasing: Bool
     @Binding var drawing: PKDrawing
 
+    @State private var widthUI: Double = 5
+
     var body: some View {
         HStack(spacing: 16) {
-            Button { isErasing = false } label: { Image(systemName: "pencil.tip") }
-                .toolIcon(active: !isErasing)
-            Button { isErasing = true }  label: { Image(systemName: "eraser") }
-                .toolIcon(active: isErasing)
-            
+            Button { isErasing = false } label: {
+                Image(systemName: "pencil.tip")
+            }
+            .toolIcon(active: !isErasing)
+
+            Button { isErasing = true } label: {
+                Image(systemName: "eraser")
+            }
+            .toolIcon(active: isErasing)
+
             ColorPicker("", selection: Binding(
                 get: { Color(selectedTool.color) },
-                set: { selectedTool = PKInkingTool(selectedTool.inkType,
-                                                   color: UIColor($0),
-                                                   width: selectedTool.width) }
+                set: { newColor in
+                    selectedTool = PKInkingTool(
+                        selectedTool.inkType,
+                        color: UIColor(newColor),
+                        width: selectedTool.width
+                    )
+                }
             ))
             .labelsHidden()
             .frame(width: 44, height: 44)
 
-            Slider(value: Binding(
-                get: { Double(selectedTool.width) },
-                set: { selectedTool = PKInkingTool(selectedTool.inkType,
-                                                   color: selectedTool.color,
-                                                   width: CGFloat($0)) }
-            ), in: 1...30)
-            .frame(maxWidth: 120)
+            Slider(
+                value: $widthUI,
+                in: 1...30,
+                step: 1
+            )
+            .frame(maxWidth: 160)
+            .onAppear {
+                widthUI = Double(selectedTool.width)
+            }
+            .onChange(of: widthUI) { newValue in
+                let newWidth = CGFloat(newValue)
+                if abs(selectedTool.width - newWidth) > 0.001 {
+                    selectedTool = PKInkingTool(
+                        selectedTool.inkType,
+                        color: selectedTool.color,
+                        width: newWidth
+                    )
+                }
+            }
 
             Spacer()
 
-            Button(role: .destructive) { drawing = PKDrawing() } label: {
+            // Очистка холста
+            Button(role: .destructive) {
+                drawing = PKDrawing()
+            } label: {
                 Image(systemName: "trash")
             }
             .destructiveIcon()

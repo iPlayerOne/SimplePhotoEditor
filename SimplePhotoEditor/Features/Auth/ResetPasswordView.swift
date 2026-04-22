@@ -8,7 +8,11 @@ struct ResetPasswordView: View {
     @State private var emailVisited = false
 
     var body: some View {
-        VStack(spacing: 32) {
+        // Вынесем простые флаги, чтобы разгрузить тайпчекер
+        let showEmailError = emailVisited && !emailFocused && vm.emailValidationMessage != nil
+        let emailErrorText = vm.emailValidationMessage ?? ""
+
+        return VStack(spacing: 32) {
             Text(String(localized: "auth.reset.header"))
                 .font(.largeTitle.weight(.bold))
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -28,11 +32,8 @@ struct ResetPasswordView: View {
                 }
             }
             .validationMessage(
-                String(localized: "auth.validation.email.invalid"),
-                visible: emailVisited
-                    && !emailFocused
-                    && !vm.email.isEmpty
-                    && !EmailValidator.isValid(vm.email)
+                vm.emailValidationMessage ?? "",
+                visible: emailVisited && vm.emailValidationMessage != nil
             )
 
             PrimaryActionButton(

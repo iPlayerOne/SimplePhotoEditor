@@ -15,8 +15,8 @@ struct CanvasStack: View {
     let focus: FocusState<UUID?>.Binding
     let baseImage: UIImage?
 
-    @State private var scale: CGFloat = 1
-    @GestureState private var pinch: CGFloat = 1
+    @State private var baseScale: CGFloat = 1
+    @State private var currentScale: CGFloat = 1
 
     var body: some View {
         let maxSize       = metrics.canvasSize
@@ -31,14 +31,27 @@ struct CanvasStack: View {
         }()
 
         let pinchGesture = MagnifyGesture()
-            .updating($pinch) { value, state, _ in
-                state = value.magnification
+            .onChanged { value in
+                currentScale = baseScale * value.magnification
             }
             .onEnded { value in
-                scale *= value.magnification
+                let minScale: CGFloat = 1.0
+
+                var newScale = baseScale * value.magnification
+                if newScale < minScale {
+                    newScale = minScale
+                }
+
+                baseScale = newScale
+
+                withAnimation(.spring(response: 0.35,
+                                      dampingFraction: 0.9,
+                                      blendDuration: 0.15)) {
+                    currentScale = newScale
+                }
             }
 
-        let zoom = extraScale * scale * pinch
+        let zoom = extraScale * currentScale
 
         ZStack {
             ZStack {
@@ -54,8 +67,12 @@ struct CanvasStack: View {
                         .frame(width: maxSize.width, height: maxSize.height)
                         .allowsHitTesting(vm.mode == .draw)
 
-                    TextOverlayLayer(textVM: textVM, focus: focus)
-                        .frame(width: maxSize.width, height: maxSize.height)
+                    TextOverlayLayer(
+                        textVM: textVM,
+                        focus: focus,
+                        rotationQuarterTurns: vm.rotationCount
+                    )
+                    .frame(width: maxSize.width, height: maxSize.height)
                 }
             }
             .frame(width: maxSize.width, height: maxSize.height)
@@ -68,7 +85,10 @@ struct CanvasStack: View {
             .scaleEffect(zoom)
             .simultaneousGesture(pinchGesture)
 
-            if vm.mode == .text && textVM.isPlacing && textVM.items.isEmpty {
+            if vm.mode == .text
+                && textVM.items.isEmpty
+                && textVM.activeID == nil
+                && focus.wrappedValue == nil {
                 Color.black.opacity(0.4)
                     .frame(width: maxSize.width, height: maxSize.height)
                     .allowsHitTesting(false)

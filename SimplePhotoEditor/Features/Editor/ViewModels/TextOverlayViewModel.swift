@@ -7,17 +7,9 @@ final class TextOverlayViewModel {
     var activeID: UUID?
     var isPlacing: Bool = false
 
-    var currentColor: Color = .white {
-        didSet { apply(.color(currentColor)) }
-    }
-
-    var currentSize: Double = 24 {
-        didSet { apply(.size(currentSize)) }
-    }
-
-    var currentFont: FontOption = .system {
-        didSet { apply(.font(currentFont)) }
-    }
+    var currentColor: Color = .blue
+    var currentSize: Double = 24
+    var currentFont: FontOption = .system
 
     var curatedFonts: [FontOption] = [
         .system, .rounded, .serif, .monospaced,
@@ -25,14 +17,29 @@ final class TextOverlayViewModel {
     ]
 
     private var waitForKeyboard: Bool = false
+    private var pendingRotationQuarterTurns: Int = 0
 
-    func enterPlacement() {
-        isPlacing = true
-        activeID  = nil
-        waitForKeyboard = true
+    var activeItem: TextItem? {
+        items.first { $0.id == activeID }
     }
 
-    func placeText(in canvas: CGSize, keyboardH: CGFloat, imageSize: CGSize?) {
+    func enterPlacement(rotationQuarterTurns: Int? = nil) {
+        activeID = nil
+        isPlacing = true
+        waitForKeyboard = true
+        if let r = rotationQuarterTurns { pendingRotationQuarterTurns = r }
+        print("🔤 enterPlacement -> isPlacing=\(isPlacing) itemsCount=\(items.count)")
+    }
+
+    func beginPlacingNewText(rotationQuarterTurns: Int? = nil) {
+        isPlacing = true
+        activeID = nil
+        waitForKeyboard = true
+        if let r = rotationQuarterTurns { pendingRotationQuarterTurns = r }
+        print("🔤 beginPlacingNewText -> isPlacing=true")
+    }
+
+    func placeText(in canvas: CGSize, keyboardH: CGFloat, imageSize: CGSize?, rotationQuarterTurns: Int? = nil) {
         let frame = CanvasFrame(canvas: canvas, keyboard: keyboardH, imageSize: imageSize)
         let gapAboveKeyboard: CGFloat = 12
 
@@ -44,6 +51,8 @@ final class TextOverlayViewModel {
         }
 
         let p = CGPoint(x: canvas.width / 2, y: y)
+        let quarter = (rotationQuarterTurns ?? pendingRotationQuarterTurns) % 4
+        let baseRotation = Double(-90 * quarter)
 
         let item = TextItem(
             text: "Текст",
@@ -51,12 +60,14 @@ final class TextOverlayViewModel {
             fontSize: currentSize,
             color: currentColor,
             position: p,
-            isEditing: true
+            isEditing: true,
+            rotation: baseRotation
         )
         items.append(item)
         activeID = item.id
         isPlacing = false
         waitForKeyboard = false
+        print("🔤 placeText -> created id=\(item.id) isPlacing=\(isPlacing)")
     }
 
     func setActive(id: UUID, editing: Bool = false) {
@@ -67,23 +78,41 @@ final class TextOverlayViewModel {
 
     func finishEditing() {
         mutateActive { $0.isEditing = false }
-        activeID = nil
-        isPlacing = true
+        // Do not touch activeID or isPlacing here
+        print("🔤 finishEditing -> isPlacing=\(isPlacing) activeID=\(activeID?.uuidString ?? "nil")")
     }
 
     func apply(_ edit: Edit) {
+        print("➡️ VM.apply start: edit=\(edit)")
         mutateActive {
             switch edit {
-            case .size(let s):  $0.fontSize = s
-            case .color(let c): $0.color = c
-            case .font(let f):  $0.font = f
+            case .size(let s):
+                $0.fontSize = s
+            case .color(let c):
+                print("🎯 VM.apply color to activeID=\(activeID?.uuidString ?? "nil") value=\(c.description)")
+                $0.color = c
+            case .font(let f):
+                $0.font = f
             }
         }
     }
 
+    func clearSelection() {
+        if activeID != nil {
+            mutateActive { $0.isEditing = false }
+        }
+        activeID = nil
+        isPlacing = false
+        waitForKeyboard = false
+        print("🔤 clearSelection -> isPlacing=\(isPlacing)")
+    }
+
     func remove(id: UUID) {
+        let removedActive = (id == activeID)
         items.removeAll { $0.id == id }
-        finishEditing()
+        if removedActive {
+            clearSelection()
+        }
     }
 
     func reset() {
@@ -91,11 +120,12 @@ final class TextOverlayViewModel {
         activeID = nil
         isPlacing = false
         waitForKeyboard = false
+        pendingRotationQuarterTurns = 0
     }
 
     func keyboardDidChange(_ h: CGFloat, canvas: CGSize, imageSize: CGSize?) {
         if waitForKeyboard, h > 0 {
-            placeText(in: canvas, keyboardH: h, imageSize: imageSize)
+            placeText(in: canvas, keyboardH: h, imageSize: imageSize, rotationQuarterTurns: pendingRotationQuarterTurns)
             return
         }
         adjustPosition(canvas: canvas, keyboardH: h, imageSize: imageSize)
@@ -116,7 +146,11 @@ final class TextOverlayViewModel {
     private func mutateActive(_ block: (inout TextItem) -> Void) {
         guard let id = activeID,
               let idx = items.firstIndex(where: { $0.id == id })
-        else { return }
+        else {
+            print("⚠️ VM.mutateActive: no active item (activeID=\(activeID?.uuidString ?? "nil"))")
+            return
+        }
+        print("✅ VM.mutateActive: found idx=\(idx) for id=\(id)")
         block(&items[idx])
     }
 }

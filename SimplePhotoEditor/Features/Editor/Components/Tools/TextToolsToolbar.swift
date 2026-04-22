@@ -56,14 +56,48 @@ struct TextToolsToolbar: View {
     }
     
     private var colorMenu: some View {
-        ColorPicker("", selection: $vm.currentColor, supportsOpacity: true)
-            .labelsHidden()
-            .contentShape(Rectangle())
+        ColorPicker(
+            "",
+            selection: Binding(
+                get: {
+                    print("ColorPicker.get – activeID =", vm.activeID as Any,
+                          "activeItem =", vm.activeItem as Any,
+                          "currentColor =", vm.currentColor)
+                    return vm.activeItem?.color ?? vm.currentColor
+                },
+                set: { newValue in
+                    print("ColorPicker.set – newValue =", newValue,
+                          "activeID =", vm.activeID as Any,
+                          "activeItem =", vm.activeItem as Any)
+
+                    if vm.activeItem != nil {
+                        vm.apply(.color(newValue))
+                    } else {
+                        vm.currentColor = newValue
+                    }
+                }
+            ),
+            supportsOpacity: true
+        )
+        .labelsHidden()
+        .contentShape(Rectangle())
     }
     
     private var sizeMenu: some View {
         Menu {
-            Picker(String(localized: "editor.size.label"), selection: $vm.currentSize) {
+            Picker(String(localized: "editor.size.label"),
+                   selection: Binding(
+                    get: {
+                        vm.activeID != nil ? (vm.activeItem?.fontSize ?? vm.currentSize) : vm.currentSize
+                    },
+                    set: { newValue in
+                        if vm.activeID != nil {
+                            vm.apply(.size(newValue))
+                        } else {
+                            vm.currentSize = newValue
+                        }
+                    })
+            ) {
                 ForEach([12,14,16,18,24,32,48,72], id: \.self) { s in
                     let fmt = String(localized: "editor.size.value.fmt")
                     Text(String(format: fmt, locale: .current, Int64(s))).tag(Double(s))
@@ -79,7 +113,19 @@ struct TextToolsToolbar: View {
     private var fontMenu: some View {
         Menu(
             content: {
-                Picker(String(localized: "editor.font.label"), selection: $vm.currentFont) {
+                Picker(String(localized: "editor.font.label"),
+                       selection: Binding(
+                        get: {
+                            vm.activeID != nil ? (vm.activeItem?.font ?? vm.currentFont) : vm.currentFont
+                        },
+                        set: { newValue in
+                            if vm.activeID != nil {
+                                vm.apply(.font(newValue))
+                            } else {
+                                vm.currentFont = newValue
+                            }
+                        })
+                ) {
                     ForEach(vm.curatedFonts) { opt in
                         Text(opt.displayName).tag(opt)
                     }
@@ -87,7 +133,7 @@ struct TextToolsToolbar: View {
             },
             label: {
                 Text(String(localized: "editor.font.sample"))
-                    .font(vm.currentFont.font(size: 16))
+                    .font((vm.activeItem?.font ?? vm.currentFont).font(size: 16))
                     .frame(width: leftItemSize.width, height: leftItemSize.height)
                     .accessibilityLabel(String(localized: "editor.font.label"))
                     .contentShape(Rectangle())

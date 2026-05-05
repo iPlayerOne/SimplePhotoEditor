@@ -1,9 +1,9 @@
-import UniformTypeIdentifiers
-import SwiftUI
+import Foundation
 
 struct ShareItem: Identifiable, Equatable {
     let id: UUID = UUID()
-    let image: UIImage
+    let url: URL
+
     static func == (lhs: ShareItem, rhs: ShareItem) -> Bool {
         lhs.id == rhs.id
     }

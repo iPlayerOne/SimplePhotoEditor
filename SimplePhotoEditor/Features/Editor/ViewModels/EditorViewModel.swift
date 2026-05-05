@@ -165,9 +165,8 @@ final class EditorViewModel: ObservableObject {
 
     private func makeShareItem(drawingOverlay: PKDrawing?) async throws -> ShareItem {
         let data = try await makeFinalImage(drawingOverlay: drawingOverlay)
-        _ = try exportService.makeShareURL(from: data, format: exportFormat)
-        guard let ui = UIImage(data: data) else { throw OverlayRenderError.encodeFailed }
-        return ShareItem(image: ui)
+        let url = try exportService.makeShareURL(from: data, format: exportFormat)
+        return ShareItem(url: url)
     }
 
     func handleCameraOutput(_ uiImage: UIImage?) {

@@ -1,4 +1,3 @@
-import PhotosUI
 import UIKit
 
 enum ExportFormat {
@@ -20,11 +19,17 @@ final class ExportServiceImpl: ExportService {
     func makeShareURL(from data: Data, format: ExportFormat = .jpeg) throws -> URL {
         switch format {
         case .jpeg:
+            guard let ui = UIImage(data: data),
+                  let jpegData = ui.jpegData(compressionQuality: 0.9)
+            else {
+                throw ExportError.encodeFailed
+            }
+
             let url = FileManager.default.temporaryDirectory
                 .appendingPathComponent(UUID().uuidString)
                 .appendingPathExtension("jpg")
 
-            guard (try? data.write(to: url, options: .atomic)) != nil else {
+            guard (try? jpegData.write(to: url, options: .atomic)) != nil else {
                 throw ExportError.writeFailed
             }
 

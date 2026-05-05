@@ -100,7 +100,7 @@ struct EditorView: View {
         .sheet(item: $vm.shareItem, onDismiss: {
             vm.clearShareItem()
         }) { item in
-            ShareSheet(items: [item.image])
+            ShareSheet(items: [item.url])
         }
         .alert(
             String(localized: "editor.no_access_camera.title"),
@@ -208,4 +208,3 @@ extension EditorView {
         )
     }
 }
-

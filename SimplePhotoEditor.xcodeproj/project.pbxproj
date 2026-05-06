@@ -16,6 +16,7 @@
 
 /* Begin PBXFileReference section */
 		3030A14A2DB1B6D70070E0E3 /* SimplePhotoEditor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SimplePhotoEditor.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		31A000012F9A000100000001 /* SimplePhotoEditorTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SimplePhotoEditorTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		30A6EC082E9D2AF9004437EB /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -38,6 +39,11 @@
 			path = SimplePhotoEditor;
 			sourceTree = "<group>";
 		};
+		31A000022F9A000100000001 /* SimplePhotoEditorTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = SimplePhotoEditorTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +58,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		31A000032F9A000100000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -60,6 +73,7 @@
 			children = (
 				30A6EC082E9D2AF9004437EB /* Localizable.xcstrings */,
 				3030A14C2DB1B6D70070E0E3 /* SimplePhotoEditor */,
+				31A000022F9A000100000001 /* SimplePhotoEditorTests */,
 				3030A14B2DB1B6D70070E0E3 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -68,6 +82,7 @@
 			isa = PBXGroup;
 			children = (
 				3030A14A2DB1B6D70070E0E3 /* SimplePhotoEditor.app */,
+				31A000012F9A000100000001 /* SimplePhotoEditorTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -101,7 +116,40 @@
 			productReference = 3030A14A2DB1B6D70070E0E3 /* SimplePhotoEditor.app */;
 			productType = "com.apple.product-type.application";
 		};
+		31A000042F9A000100000001 /* SimplePhotoEditorTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 31A000092F9A000100000001 /* Build configuration list for PBXNativeTarget "SimplePhotoEditorTests" */;
+			buildPhases = (
+				31A000052F9A000100000001 /* Sources */,
+				31A000032F9A000100000001 /* Frameworks */,
+				31A000062F9A000100000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				31A000082F9A000100000001 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				31A000022F9A000100000001 /* SimplePhotoEditorTests */,
+			);
+			name = SimplePhotoEditorTests;
+			packageProductDependencies = (
+			);
+			productName = SimplePhotoEditorTests;
+			productReference = 31A000012F9A000100000001 /* SimplePhotoEditorTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
+
+/* Begin PBXContainerItemProxy section */
+		31A000072F9A000100000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 3030A1422DB1B6D70070E0E3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3030A1492DB1B6D70070E0E3;
+			remoteInfo = SimplePhotoEditor;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXProject section */
 		3030A1422DB1B6D70070E0E3 /* Project object */ = {
@@ -113,6 +161,10 @@
 				TargetAttributes = {
 					3030A1492DB1B6D70070E0E3 = {
 						CreatedOnToolsVersion = 16.3;
+					};
+					31A000042F9A000100000001 = {
+						CreatedOnToolsVersion = 16.3;
+						TestTargetID = 3030A1492DB1B6D70070E0E3;
 					};
 				};
 			};
@@ -136,6 +188,7 @@
 			projectRoot = "";
 			targets = (
 				3030A1492DB1B6D70070E0E3 /* SimplePhotoEditor */,
+				31A000042F9A000100000001 /* SimplePhotoEditorTests */,
 			);
 		};
 /* End PBXProject section */
@@ -149,6 +202,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		31A000062F9A000100000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -159,7 +219,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		31A000052F9A000100000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		31A000082F9A000100000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3030A1492DB1B6D70070E0E3 /* SimplePhotoEditor */;
+			targetProxy = 31A000072F9A000100000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		3030A1532DB1B6D80070E0E3 /* Debug */ = {
@@ -357,6 +432,54 @@
 			};
 			name = Release;
 		};
+		31A0000A2F9A000100000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = M2L3X2RFT6;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = iKorobov.SimplePhotoEditorTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SimplePhotoEditor.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SimplePhotoEditor";
+			};
+			name = Debug;
+		};
+		31A0000B2F9A000100000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = M2L3X2RFT6;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = iKorobov.SimplePhotoEditorTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SimplePhotoEditor.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SimplePhotoEditor";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -374,6 +497,15 @@
 			buildConfigurations = (
 				3030A1562DB1B6D80070E0E3 /* Debug */,
 				3030A1572DB1B6D80070E0E3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		31A000092F9A000100000001 /* Build configuration list for PBXNativeTarget "SimplePhotoEditorTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				31A0000A2F9A000100000001 /* Debug */,
+				31A0000B2F9A000100000001 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

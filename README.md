@@ -187,4 +187,10 @@ find . -path './.git' -prune -o -type f -print0 | xargs -0 wc -l
 xcodebuild -project SimplePhotoEditor.xcodeproj -scheme SimplePhotoEditor -destination 'generic/platform=iOS Simulator' build
 ```
 
-Сборка проходила успешно. Автоматизированный test target в проекте сейчас не настроен, поэтому регрессионная проверка выполнялась сборкой и ручным прохождением основных сценариев.
+Unit-тесты:
+
+```bash
+xcodebuild test -project SimplePhotoEditor.xcodeproj -scheme SimplePhotoEditor -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+```
+
+Автоматизированные тесты покрывают валидацию email и ключевые состояния auth ViewModel. Сценарии редактора с Photos, Camera, PencilKit и Share Sheet проверяются ручным smoke-тестом, потому что они завязаны на системный UI и разрешения.

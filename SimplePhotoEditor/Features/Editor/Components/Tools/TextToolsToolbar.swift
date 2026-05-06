@@ -60,16 +60,9 @@ struct TextToolsToolbar: View {
             "",
             selection: Binding(
                 get: {
-                    print("ColorPicker.get – activeID =", vm.activeID as Any,
-                          "activeItem =", vm.activeItem as Any,
-                          "currentColor =", vm.currentColor)
                     return vm.activeItem?.color ?? vm.currentColor
                 },
                 set: { newValue in
-                    print("ColorPicker.set – newValue =", newValue,
-                          "activeID =", vm.activeID as Any,
-                          "activeItem =", vm.activeItem as Any)
-
                     if vm.activeItem != nil {
                         vm.apply(.color(newValue))
                     } else {

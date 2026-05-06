@@ -69,10 +69,6 @@ final class FilterPreviewCache: ObservableObject {
         guard let thumb = decode.downsample(data, maxDimension: previewMaxSide, previewScale) else {
             return nil
         }
-        
-        print("thumb:", Int(thumb.size.width), "x", Int(thumb.size.height),
-                  "scale:", thumb.scale,
-                  "px:", Int(thumb.size.width * thumb.scale), "x", Int(thumb.size.height * thumb.scale))
 
         guard !filterName.isEmpty else {
             return thumb

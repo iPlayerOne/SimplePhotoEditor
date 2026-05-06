@@ -56,7 +56,6 @@
 //                guard let cg = ctx.createCGImage(cropped, from: originalExtent) else {
 //                    return baseImage
 //                }
-//                print("FilteredImageView base:", baseImage.size, "scale:", baseImage.scale)
 //                return UIImage(cgImage: cg, scale: baseImage.scale, orientation: .up)
 //            }
 //        }.value

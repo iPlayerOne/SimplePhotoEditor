@@ -4,6 +4,12 @@ import Combine
 import PencilKit
 import PhotosUI
 
+struct EditorExportAlert: Identifiable {
+    let id = UUID()
+    let title: String
+    let message: String
+}
+
 @MainActor
 final class EditorViewModel: ObservableObject {
     @Published var mode: EditorMode = .filters
@@ -21,6 +27,8 @@ final class EditorViewModel: ObservableObject {
     @Published var shareItem: ShareItem?
     @Published var exportFormat: ExportFormat = .png
     @Published var libraryItem: PhotosPickerItem?
+    @Published var exportAlert: EditorExportAlert?
+    @Published private(set) var isExporting = false
 
     var canTransformImage: Bool {
         originalImage != nil && mode == .filters
@@ -93,12 +101,49 @@ final class EditorViewModel: ObservableObject {
     func updateKeyboard(h: CGFloat) { keyboardHeight = h }
 
     func share(drawingOverlay: PKDrawing?) {
+        guard !isExporting else { return }
         Task { [weak self] in
             guard let self else { return }
+            self.isExporting = true
+            defer { self.isExporting = false }
+
             do {
                 let item = try await makeShareItem(drawingOverlay: drawingOverlay)
                 self.shareItem = item
-            } catch { }
+            } catch {
+                self.exportAlert = EditorExportAlert(
+                    title: String(localized: "editor.export.error.title"),
+                    message: String(localized: "editor.export.error.message")
+                )
+            }
+        }
+    }
+
+    func saveToPhotoLibrary(drawingOverlay: PKDrawing?) {
+        guard !isExporting else { return }
+        Task { [weak self] in
+            guard let self else { return }
+            self.isExporting = true
+            defer { self.isExporting = false }
+
+            do {
+                let data = try await makeFinalImage(drawingOverlay: drawingOverlay)
+                try await exportService.saveToPhotoLibrary(data: data)
+                self.exportAlert = EditorExportAlert(
+                    title: String(localized: "editor.export.saved.title"),
+                    message: String(localized: "editor.export.saved.message")
+                )
+            } catch ExportError.photoLibraryAccessDenied {
+                self.exportAlert = EditorExportAlert(
+                    title: String(localized: "editor.export.error.title"),
+                    message: String(localized: "editor.export.photos_denied.message")
+                )
+            } catch {
+                self.exportAlert = EditorExportAlert(
+                    title: String(localized: "editor.export.error.title"),
+                    message: String(localized: "editor.export.error.message")
+                )
+            }
         }
     }
 
@@ -110,6 +155,7 @@ final class EditorViewModel: ObservableObject {
         rotationCount = 0
         isFlippedHorizontally = false
         shareItem = nil
+        exportAlert = nil
         textVM.reset()
         textVM.finishEditing()
     }
@@ -138,7 +184,7 @@ final class EditorViewModel: ObservableObject {
         let ui = await pipeline.makePreview(
             from: data,
             filterName: filter?.filterName,
-            downscaleFactor: 0.25
+            downscaleFactor: 1.0
         )
 
         if Task.isCancelled { return }

@@ -40,6 +40,7 @@ struct EditorView: View {
         ZStack {
             canvasArea
                 .id(imageSelectionToken)
+                .ignoresSafeArea(.container, edges: .bottom)
                 .ignoresSafeArea(.keyboard, edges: .bottom)
             
             bottomTools
@@ -102,6 +103,13 @@ struct EditorView: View {
         }) { item in
             ShareSheet(items: [item.url])
         }
+        .alert(item: $vm.exportAlert) { alert in
+            Alert(
+                title: Text(alert.title),
+                message: Text(alert.message),
+                dismissButton: .default(Text(String(localized: "common.ok")))
+            )
+        }
         .alert(
             String(localized: "editor.no_access_camera.title"),
             isPresented: $showNoAccessAlert
@@ -120,11 +128,11 @@ struct EditorView: View {
             if new == .text, old != .text { vm.textVM.enterPlacement(rotationQuarterTurns: vm.rotationCount) }
             if old == .text, new != .text { vm.textVM.finishEditing() }
         }
-        .onChange(of: vm.inputData) { _, date in
+        .onChange(of: vm.originalImage) { _, _ in
             focusedItemID = nil
             drawing = PKDrawing()
             vm.resetForNewImage()
-            previewCache.preparePreviews(for: date, filters: filters)
+            previewCache.preparePreviews(for: vm.inputData, filters: filters)
             imageSelectionToken = UUID()
         }
     }
@@ -200,6 +208,10 @@ extension EditorView {
         EditorNavigationBar(
             showSourceDialog: $isSourceSheetPresented,
             isShareEnabled: vm.previewImage != nil,
+            isExporting: vm.isExporting,
+            onSaveToPhotos: {
+                vm.saveToPhotoLibrary(drawingOverlay: drawing)
+            },
             onShareFormat: { format in
                 vm.exportFormat = format
                 vm.share(drawingOverlay: drawing)

@@ -24,7 +24,8 @@ final class RegistrationViewModel: ObservableObject {
         $email
             .combineLatest($password, $confirmPassword)
             .map { email, pass, confirm in
-                let hasEmail  = !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                let cleanEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+                let hasEmail  = EmailValidator.isValid(cleanEmail)
                 let hasPass   = pass.count >= 6
                 let matches   = !pass.isEmpty && pass == confirm
                 return hasEmail && hasPass && matches

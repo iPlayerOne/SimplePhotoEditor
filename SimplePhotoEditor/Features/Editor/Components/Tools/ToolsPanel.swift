@@ -21,18 +21,15 @@ struct ToolsPanel: View {
         max(0, panelHeight - verticalInset * 2)
     }
 
-    private var panelShape: some InsettableShape {
-        Capsule()
-    }
-
     var body: some View {
         content
             .padding(.vertical, verticalInset)
             .frame(maxWidth: .infinity)
             .frame(height: panelHeight)
-            .clipShape(panelShape)
+            .glassEffect(.regular, in: Capsule())
+            .clipShape(Capsule())
+            .compositingGroup()
             .shadow(color: .black.opacity(0.08), radius: 12, x: 0, y: -2)
-            .glassEffect(.clear)
     }
 
     @ViewBuilder

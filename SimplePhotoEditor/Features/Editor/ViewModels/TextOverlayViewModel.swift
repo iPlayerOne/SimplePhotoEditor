@@ -28,7 +28,6 @@ final class TextOverlayViewModel {
         isPlacing = true
         waitForKeyboard = true
         if let r = rotationQuarterTurns { pendingRotationQuarterTurns = r }
-        print("🔤 enterPlacement -> isPlacing=\(isPlacing) itemsCount=\(items.count)")
     }
 
     func beginPlacingNewText(rotationQuarterTurns: Int? = nil) {
@@ -36,7 +35,6 @@ final class TextOverlayViewModel {
         activeID = nil
         waitForKeyboard = true
         if let r = rotationQuarterTurns { pendingRotationQuarterTurns = r }
-        print("🔤 beginPlacingNewText -> isPlacing=true")
     }
 
     func placeText(in canvas: CGSize, keyboardH: CGFloat, imageSize: CGSize?, rotationQuarterTurns: Int? = nil) {
@@ -67,7 +65,6 @@ final class TextOverlayViewModel {
         activeID = item.id
         isPlacing = false
         waitForKeyboard = false
-        print("🔤 placeText -> created id=\(item.id) isPlacing=\(isPlacing)")
     }
 
     func setActive(id: UUID, editing: Bool = false) {
@@ -79,17 +76,14 @@ final class TextOverlayViewModel {
     func finishEditing() {
         mutateActive { $0.isEditing = false }
         // Do not touch activeID or isPlacing here
-        print("🔤 finishEditing -> isPlacing=\(isPlacing) activeID=\(activeID?.uuidString ?? "nil")")
     }
 
     func apply(_ edit: Edit) {
-        print("➡️ VM.apply start: edit=\(edit)")
         mutateActive {
             switch edit {
             case .size(let s):
                 $0.fontSize = s
             case .color(let c):
-                print("🎯 VM.apply color to activeID=\(activeID?.uuidString ?? "nil") value=\(c.description)")
                 $0.color = c
             case .font(let f):
                 $0.font = f
@@ -104,7 +98,6 @@ final class TextOverlayViewModel {
         activeID = nil
         isPlacing = false
         waitForKeyboard = false
-        print("🔤 clearSelection -> isPlacing=\(isPlacing)")
     }
 
     func remove(id: UUID) {
@@ -147,10 +140,8 @@ final class TextOverlayViewModel {
         guard let id = activeID,
               let idx = items.firstIndex(where: { $0.id == id })
         else {
-            print("⚠️ VM.mutateActive: no active item (activeID=\(activeID?.uuidString ?? "nil"))")
             return
         }
-        print("✅ VM.mutateActive: found idx=\(idx) for id=\(id)")
         block(&items[idx])
     }
 }

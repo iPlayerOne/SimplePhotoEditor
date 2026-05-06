@@ -1,4 +1,5 @@
 import UIKit
+import Photos
 
 enum ExportFormat {
     case jpeg
@@ -8,9 +9,11 @@ enum ExportFormat {
 enum ExportError: Error {
     case writeFailed
     case encodeFailed
+    case photoLibraryAccessDenied
 }
 protocol ExportService {
     func makeShareURL(from data: Data, format: ExportFormat) throws -> URL
+    func saveToPhotoLibrary(data: Data) async throws
 }
 
 
@@ -51,6 +54,43 @@ final class ExportServiceImpl: ExportService {
             }
 
             return url
+        }
+    }
+
+    func saveToPhotoLibrary(data: Data) async throws {
+        guard UIImage(data: data) != nil else {
+            throw ExportError.encodeFailed
+        }
+
+        let status = await requestPhotoLibraryAccessIfNeeded()
+        guard status == .authorized || status == .limited else {
+            throw ExportError.photoLibraryAccessDenied
+        }
+
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            PHPhotoLibrary.shared().performChanges {
+                let request = PHAssetCreationRequest.forAsset()
+                request.addResource(with: .photo, data: data, options: nil)
+            } completionHandler: { success, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else if success {
+                    continuation.resume()
+                } else {
+                    continuation.resume(throwing: ExportError.writeFailed)
+                }
+            }
+        }
+    }
+
+    private func requestPhotoLibraryAccessIfNeeded() async -> PHAuthorizationStatus {
+        let current = PHPhotoLibrary.authorizationStatus(for: .addOnly)
+        guard current == .notDetermined else { return current }
+
+        return await withCheckedContinuation { continuation in
+            PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
+                continuation.resume(returning: status)
+            }
         }
     }
 

@@ -4,6 +4,8 @@ import PhotosUI
 struct EditorNavigationBar: ToolbarContent {
     @Binding var showSourceDialog: Bool
     let isShareEnabled: Bool
+    let isExporting: Bool
+    let onSaveToPhotos: () -> Void
     let onShareFormat: (ExportFormat) -> Void
     let onLogout: () -> Void
     @State private var showShareFormatDialog = false
@@ -24,12 +26,15 @@ struct EditorNavigationBar: ToolbarContent {
             } label: {
                 Image(systemName: "square.and.arrow.up")
             }
-            .disabled(!isShareEnabled)
+            .disabled(!isShareEnabled || isExporting)
             .labelStyle(.iconOnly)
             .confirmationDialog(
                 String(localized: "editor.export.format.title"),
                 isPresented: $showShareFormatDialog
             ) {
+                Button(String(localized: "editor.export.save_to_photos")) {
+                    onSaveToPhotos()
+                }
                 Button(String(localized: "editor.export.share.png")) {
                     onShareFormat(.png)
                 }

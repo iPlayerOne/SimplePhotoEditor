@@ -32,13 +32,9 @@ struct PhotoLayer: View {
 
         Group {
             if let ui = image {
-                let iw = ui.size.width
-                let ih = ui.size.height
-                let mode = (contentMode == .fit) ? "fit" : "fill"
-
                 Image(uiImage: ui)
-                    .interpolation(.none)
-                    .antialiased(false)
+                    .interpolation(.high)
+                    .antialiased(true)
                     .resizable()
                     .aspectRatio(contentMode: contentMode)
                     .frame(width: w, height: h)

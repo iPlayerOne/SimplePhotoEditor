@@ -32,7 +32,7 @@ final class ImagePipelineImpl: ImagePipeline {
         await Task(priority: .userInitiated) { [decode, filter] in
             if Task.isCancelled { return nil }
 
-            let scale = UIScreen.main.scale
+            let scale = DisplayScale.fallback
             guard let preview = decode.downsample(data, maxDimension: 600, scale) else {
                 return nil
             }

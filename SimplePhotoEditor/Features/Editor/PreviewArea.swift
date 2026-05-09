@@ -2,6 +2,8 @@ import SwiftUI
 import PencilKit
 
 struct PreviewArea: View {
+    @Environment(\.displayScale) private var displayScale
+
     @ObservedObject var vm: EditorViewModel
     @Bindable var textVM: TextOverlayViewModel
 
@@ -24,7 +26,8 @@ struct PreviewArea: View {
                 geo: geo,
                 baseImage: metricsImage,
                 bottomChrome: bottomChromeHeight,
-                heightRatio: heightRatio
+                heightRatio: heightRatio,
+                displayScale: displayScale
             )
 
             ZStack {

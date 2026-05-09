@@ -25,7 +25,7 @@ struct RegistrationView: View {
                 textContentType: .emailAddress
             )
             .focused($emailFocused)
-            .onChange(of: emailFocused) { isFocused in
+            .onChange(of: emailFocused) { _, isFocused in
                 if !isFocused { emailVisited = true }
             }
             .validationMessage(
@@ -43,7 +43,7 @@ struct RegistrationView: View {
                 textContentType: .newPassword
             )
             .focused($passwordFocused)
-            .onChange(of: passwordFocused) { isFocused in
+            .onChange(of: passwordFocused) { _, isFocused in
                 if !isFocused { passwordVisited = true }
             }
             .validationMessage(
@@ -61,7 +61,7 @@ struct RegistrationView: View {
                 textContentType: .newPassword
             )
             .focused($repeatFocused)
-            .onChange(of: repeatFocused) { isFocused in
+            .onChange(of: repeatFocused) { _, isFocused in
                 if !isFocused { repeatVisited = true }
             }
             .validationMessage(

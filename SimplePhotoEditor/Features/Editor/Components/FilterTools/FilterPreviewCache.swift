@@ -16,7 +16,7 @@ final class FilterPreviewCache: ObservableObject {
     init(
         decode: ImageDecodeService = ImageDecodeServiceImpl(),
         filter: FilterService = FilterServiceImpl(),
-        previewScale: CGFloat = UIScreen.main.scale
+        previewScale: CGFloat = DisplayScale.fallback
     ) {
         self.decode = decode
         self.filter = filter

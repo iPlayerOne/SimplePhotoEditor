@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct PhotoLayer: View {
+    @Environment(\.displayScale) private var displayScale
+
     let image:   UIImage?
     let maxSize: CGSize
     let onAddImage: (() -> Void)?
@@ -26,7 +28,7 @@ struct PhotoLayer: View {
     }
     
     var body: some View {
-        let scale = UIScreen.main.scale
+        let scale = displayScale
         let w = snapToPixel(maxSize.width, scale: scale)
         let h = snapToPixel(maxSize.height, scale: scale)
 

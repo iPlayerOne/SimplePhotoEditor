@@ -8,11 +8,7 @@ struct ResetPasswordView: View {
     @State private var emailVisited = false
 
     var body: some View {
-        // Вынесем простые флаги, чтобы разгрузить тайпчекер
-        let showEmailError = emailVisited && !emailFocused && vm.emailValidationMessage != nil
-        let emailErrorText = vm.emailValidationMessage ?? ""
-
-        return VStack(spacing: 32) {
+        VStack(spacing: 32) {
             Text(String(localized: "auth.reset.header"))
                 .font(.largeTitle.weight(.bold))
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -24,7 +20,7 @@ struct ResetPasswordView: View {
                 textContentType: .emailAddress
             )
             .focused($emailFocused)
-            .onChange(of: emailFocused) { isFocused in
+            .onChange(of: emailFocused) { _, isFocused in
                 if !isFocused {
                     withAnimation(.none) {
                         emailVisited = true

@@ -42,7 +42,7 @@ struct DrawToolsPanel: View {
             .onAppear {
                 widthUI = Double(selectedTool.width)
             }
-            .onChange(of: widthUI) { newValue in
+            .onChange(of: widthUI) { _, newValue in
                 let newWidth = CGFloat(newValue)
                 if abs(selectedTool.width - newWidth) > 0.001 {
                     selectedTool = PKInkingTool(

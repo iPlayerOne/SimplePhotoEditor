@@ -1,4 +1,5 @@
 import SwiftUI
+import GoogleSignIn
 
 @main
 struct SimplePhotoEditorApp: App {
@@ -22,6 +23,9 @@ struct SimplePhotoEditorApp: App {
                 onLogout:  { session.logout() }
             )
             .environmentObject(session)
+            .onOpenURL { url in
+                GIDSignIn.sharedInstance.handle(url)
+            }
         }
     }
 }

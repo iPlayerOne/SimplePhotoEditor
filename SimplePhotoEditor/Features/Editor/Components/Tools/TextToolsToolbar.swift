@@ -136,7 +136,7 @@ struct TextToolsToolbar: View {
 }
 
 #Preview("TextToolsToolbar") {
-    var vm = TextOverlayViewModel()
+    let vm = TextOverlayViewModel()
     vm.currentSize = 24
     vm.currentColor = .white
 

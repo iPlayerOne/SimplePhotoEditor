@@ -168,40 +168,42 @@ extension EditorView {
     }
     
     @ViewBuilder private var bottomTools: some View {
-        Color.clear
-            .safeAreaInset(edge: .bottom) {
-                Group {
-                    switch vm.mode {
-                        case .draw, .filters:
-                            ToolsPanel(
-                                mode: vm.mode,
-                                hasImage: vm.originalImage != nil,
-                                filters: filters,
-                                selectedFilter: $vm.selectedFilter,
-                                cache: previewCache,
-                                drawing: $drawing,
-                                tool: $tool,
-                                isErasing: $isErasing
-                            )
-                            .padding(.horizontal, 12)
-                            
-                        case .text:
-                            if vm.textVM.activeID != nil {
-                                TextToolsToolbar(
-                                    vm: vm.textVM,
-                                    onDone: {
-                                        focusedItemID = nil
-                                        vm.textVM.finishEditing()
-                                        vm.textVM.clearSelection()
-                                    }
+        if vm.originalImage != nil {
+            Color.clear
+                .safeAreaInset(edge: .bottom) {
+                    Group {
+                        switch vm.mode {
+                            case .draw, .filters:
+                                ToolsPanel(
+                                    mode: vm.mode,
+                                    hasImage: true,
+                                    filters: filters,
+                                    selectedFilter: $vm.selectedFilter,
+                                    cache: previewCache,
+                                    drawing: $drawing,
+                                    tool: $tool,
+                                    isErasing: $isErasing
                                 )
-                                .transition(.move(edge: .bottom).combined(with: .opacity))
-                            }
+                                .padding(.horizontal, 12)
+
+                            case .text:
+                                if vm.textVM.activeID != nil {
+                                    TextToolsToolbar(
+                                        vm: vm.textVM,
+                                        onDone: {
+                                            focusedItemID = nil
+                                            vm.textVM.finishEditing()
+                                            vm.textVM.clearSelection()
+                                        }
+                                    )
+                                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                                }
+                        }
                     }
                 }
-            }
-            .animation(.snappy, value: vm.mode)
-            .animation(.snappy, value: vm.keyboardHeight)
+                .animation(.snappy, value: vm.mode)
+                .animation(.snappy, value: vm.keyboardHeight)
+        }
     }
     
     @ToolbarContentBuilder private var navBar: some ToolbarContent {

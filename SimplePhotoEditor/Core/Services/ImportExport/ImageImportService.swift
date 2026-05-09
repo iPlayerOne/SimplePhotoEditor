@@ -27,7 +27,7 @@ final class ImageImportServiceImpl: ImageImportService {
         if let swiftUIImage = try await item.loadTransferable(type: Image.self) {
             return await MainActor.run {
                 let renderer = ImageRenderer(content: swiftUIImage)
-                renderer.scale = UIScreen.main.scale
+                renderer.scale = DisplayScale.fallback
                 if let uiImage = renderer.uiImage {
                     return uiImage.jpegData(compressionQuality: 0.95)
                         ?? uiImage.pngData()

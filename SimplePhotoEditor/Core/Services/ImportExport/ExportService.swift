@@ -13,6 +13,7 @@ enum ExportError: Error {
 }
 protocol ExportService {
     func makeShareURL(from data: Data, format: ExportFormat) throws -> URL
+    func removeShareURL(_ url: URL)
     func saveToPhotoLibrary(data: Data) async throws
 }
 
@@ -55,6 +56,13 @@ final class ExportServiceImpl: ExportService {
 
             return url
         }
+    }
+
+    func removeShareURL(_ url: URL) {
+        guard url.deletingLastPathComponent() == FileManager.default.temporaryDirectory else {
+            return
+        }
+        try? FileManager.default.removeItem(at: url)
     }
 
     func saveToPhotoLibrary(data: Data) async throws {

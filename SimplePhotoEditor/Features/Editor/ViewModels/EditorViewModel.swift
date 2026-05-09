@@ -147,14 +147,19 @@ final class EditorViewModel: ObservableObject {
         }
     }
 
-    func clearShareItem() { shareItem = nil }
+    func clearShareItem() {
+        if let url = shareItem?.url {
+            exportService.removeShareURL(url)
+        }
+        shareItem = nil
+    }
 
     func resetForNewImage() {
         mode = .filters
         selectedFilter = nil
         rotationCount = 0
         isFlippedHorizontally = false
-        shareItem = nil
+        clearShareItem()
         exportAlert = nil
         textVM.reset()
         textVM.finishEditing()

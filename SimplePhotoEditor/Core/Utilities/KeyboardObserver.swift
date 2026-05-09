@@ -20,8 +20,9 @@ final class KeyboardObserver: ObservableObject {
 
             Publishers.Merge(willShow, willHide)
                 .receive(on: RunLoop.main)
-                .assign(to: \.height, on: self)
+                .sink { [weak self] height in
+                    self?.height = height
+                }
                 .store(in: &cancellables)
         }
 }
-

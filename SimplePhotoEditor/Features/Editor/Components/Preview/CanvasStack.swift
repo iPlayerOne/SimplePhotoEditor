@@ -52,6 +52,10 @@ struct CanvasStack: View {
             }
 
         let zoom = extraScale * currentScale
+        let showsTextHint = vm.mode == .text
+            && textVM.items.isEmpty
+            && textVM.activeID == nil
+            && focus.wrappedValue == nil
 
         ZStack {
             ZStack {
@@ -74,6 +78,12 @@ struct CanvasStack: View {
                     )
                     .frame(width: maxSize.width, height: maxSize.height)
                 }
+
+                if showsTextHint {
+                    Color.black.opacity(0.4)
+                        .frame(width: maxSize.width, height: maxSize.height)
+                        .allowsHitTesting(false)
+                }
             }
             .frame(width: maxSize.width, height: maxSize.height)
             .contentShape(Rectangle())
@@ -85,14 +95,7 @@ struct CanvasStack: View {
             .scaleEffect(zoom)
             .simultaneousGesture(pinchGesture)
 
-            if vm.mode == .text
-                && textVM.items.isEmpty
-                && textVM.activeID == nil
-                && focus.wrappedValue == nil {
-                Color.black.opacity(0.4)
-                    .frame(width: maxSize.width, height: maxSize.height)
-                    .allowsHitTesting(false)
-
+            if showsTextHint {
                 Text(String(localized: "editor.text.tap_to_add"))
                     .font(.headline)
                     .foregroundColor(.white)

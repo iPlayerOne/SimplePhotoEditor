@@ -46,7 +46,7 @@ struct LoginView: View {
                         textContentType: .emailAddress
                     )
                     .focused($focusedField, equals: .email)
-                    .onChange(of: focusedField) { newValue in
+                    .onChange(of: focusedField) { _, newValue in
                         if newValue != .email {
                             emailVisited = true
                         }
@@ -70,7 +70,7 @@ struct LoginView: View {
                         textContentType: .password
                     )
                     .focused($focusedField, equals: .password)
-                    .onChange(of: focusedField) { newValue in
+                    .onChange(of: focusedField) { _, newValue in
                         if newValue != .password {
                             passwordVisited = true
                         }

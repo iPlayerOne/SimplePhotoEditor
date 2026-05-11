@@ -51,7 +51,6 @@ struct TextItemView: View {
             .onSubmit {
                 focus.wrappedValue = nil
                 vm.finishEditing()
-//                vm.clearSelection()
             }
             .onChange(of: focus.wrappedValue) { _, newFocus in
                 if newFocus == item.id {
@@ -62,4 +61,3 @@ struct TextItemView: View {
             }
     }
 }
-

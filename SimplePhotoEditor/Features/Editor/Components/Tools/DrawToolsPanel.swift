@@ -55,7 +55,6 @@ struct DrawToolsPanel: View {
 
             Spacer()
 
-            // Очистка холста
             Button(role: .destructive) {
                 drawing = PKDrawing()
             } label: {

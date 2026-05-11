@@ -75,7 +75,6 @@ final class TextOverlayViewModel {
 
     func finishEditing() {
         mutateActive { $0.isEditing = false }
-        // Do not touch activeID or isPlacing here
     }
 
     func apply(_ edit: Edit) {

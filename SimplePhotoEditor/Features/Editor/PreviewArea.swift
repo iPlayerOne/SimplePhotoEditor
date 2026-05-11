@@ -55,9 +55,6 @@ struct PreviewArea: View {
                         textVM.clearSelection()
                         return
                     }
-
-//                    guard textVM.isPlacing else { return }
-
                     let overlap = keyboardOverlap(
                         in: geo,
                         keyboardH: vm.keyboardHeight,
